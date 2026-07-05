@@ -6,6 +6,8 @@ KubeClaw diagnoses Kubernetes incidents from **frozen replay evidence** — pre-
 
 External AI systems may consume KubeClaw results through a validated contract boundary. They can explain reports and suggest read-only investigation steps, but cannot bypass safety guards or override the engine's diagnosis.
 
+![KubeClaw end-to-end architecture](../images/kubeclaw-diagram.png)
+
 ## Data flow
 
 ```

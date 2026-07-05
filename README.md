@@ -16,6 +16,8 @@ It is a deterministic, safety-bounded diagnostic layer that future AI systems co
 
 Given frozen read-only evidence from a bounded set of diagnostic tools, KubeClaw validates and redacts inputs, extracts facts, classifies incidents, ranks hypotheses, computes calibrated confidence, optionally performs one bounded drift recheck, and produces reproducible reports. The same evidence always produces the same diagnosis.
 
+![KubeClaw architecture — deterministic Kubernetes diagnostics with safety by design](images/kubeclaw-diagram.png)
+
 ---
 
 ## Current demo flow
