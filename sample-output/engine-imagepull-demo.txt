@@ -1,0 +1,20 @@
+============================================================
+  KubeClaw Diagnosis
+============================================================
+
+  session_id:          golden-imagepull-backoff
+  corpus:              golden
+  drift:               false
+  top_class:           imagepull
+  confidence:          0.88
+  insufficient_evidence: False
+
+  top hypotheses:
+    - imagepull: confidence=0.880
+  next_best_diagnostic: describe_pod: Describe pod events for image pull error details.
+
+  safety notes:
+    ✓ replay only — offline evidence, no live cluster
+    ✓ read-only — no write operations executed
+    ✓ no remediation executed
+    ✓ six-tool allowlist preserved

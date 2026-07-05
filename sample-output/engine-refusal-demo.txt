@@ -1,0 +1,14 @@
+============================================================
+  KubeClaw Refusal
+============================================================
+
+  session_id:          golden-refusal-unsafe-context
+  corpus:              golden
+  refused:             true
+  refusal_reason:      context_guard
+  explanation:         Kubernetes context 'prod-cluster' is not the required 'kind-kubeclaw' context. Pass an explicit unsafe override to target another context; KubeClaw will not do so silently.
+
+  safety notes:
+    ✓ refusal is terminal — no diagnostic loop continues after refusal
+    ✓ no remediation executed
+    ✓ replay only — offline evidence, no live cluster

@@ -1,0 +1,25 @@
+============================================================
+  OpenClaw Agent Summary
+============================================================
+
+  KubeClaw diagnosis: imagepull
+  Confidence: 0.88
+
+  What KubeClaw found:
+    KubeClaw diagnosed this incident as imagepull with confidence 0.88. Container image cannot be pulled from the registry.
+
+  Top hypotheses:
+    - imagepull: confidence=0.880
+
+  What would change the diagnosis:
+    Image pull succeeds and pod reaches Running without ImagePullBackOff.
+
+  Safe human next step:
+    A human could inspect the image reference and registry access. A human could review pod events for image pull failures.
+
+  Safety boundary:
+    - I did not call kubectl
+    - I did not modify the cluster
+    - I did not override KubeClaw's diagnosis
+    - I did not invent evidence
+    - I did not execute remediation
