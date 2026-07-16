@@ -1,0 +1,61 @@
+{
+  "schema_version": "agent_safe_response/v1",
+  "producer": "kubeclaw",
+  "outcome_type": "diagnosis",
+  "diagnosis": {
+    "top_class": "imagepull",
+    "confidence": 0.88,
+    "summary": "KubeClaw diagnosed imagepull with confidence 0.88 from deterministic replay evidence.",
+    "hypotheses": [
+      {
+        "rank": 1,
+        "incident_class": "imagepull",
+        "confidence": 0.88,
+        "supporting_evidence_ids": [
+          "ev-001",
+          "ev-002"
+        ],
+        "contradiction_evidence_ids": []
+      }
+    ]
+  },
+  "insufficient_evidence": null,
+  "refusal": null,
+  "drift": {
+    "triggered": false,
+    "delta": null
+  },
+  "evidence": [
+    {
+      "evidence_id": "ev-001",
+      "tool": "events_tail",
+      "source": "report_json.hypotheses[0].supporting_evidence[0]",
+      "summary": "imagepull:errimagepull:events_tail",
+      "support": "supports"
+    },
+    {
+      "evidence_id": "ev-002",
+      "tool": "events_tail",
+      "source": "report_json.hypotheses[0].supporting_evidence[1]",
+      "summary": "imagepull:imagepullbackoff:events_tail",
+      "support": "supports"
+    }
+  ],
+  "safety": {
+    "read_only": true,
+    "no_remediation": true,
+    "no_live_diagnosis": true,
+    "llm_in_engine": false,
+    "kubectl_mutation_allowed": false,
+    "human_approval_required_for_agent": true
+  },
+  "provenance": {
+    "session_id": "golden-imagepull-backoff",
+    "corpus": "golden",
+    "source": "golden/sessions/golden-imagepull-backoff",
+    "generated": false,
+    "reviewed_and_promoted": true,
+    "evaluation_use_allowed": true,
+    "replay_source_of_truth": true
+  }
+}

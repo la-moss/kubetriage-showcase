@@ -4,6 +4,22 @@ KubeClaw is a deterministic Kubernetes diagnostic engine designed around safety-
 
 > KubeClaw is not an AI Kubernetes agent. It is a deterministic safety substrate that a future AI infrastructure agent could consume, once additional admission gates pass.
 
+## Why I built this
+
+AI agents near Kubernetes are risky in a specific way: a language model can sound confident while having no grounded evidence for its claims, no authority boundary separating its prose from the actual diagnosis, and no safe execution controls between its output and a cluster. An agent that hallucinates a root cause is bad; one that hallucinates a fix and runs it is worse.
+
+KubeClaw explores the opposite approach. Instead of starting with an AI agent and bolting safety on afterwards, it builds the deterministic diagnostic authority layer first — before any AI explanation layer is admitted. The engine decides what is diagnosed, at what confidence, from which evidence; any future AI layer would only be allowed to explain that result, never to override it.
+
+The goal is not "AI runs kubectl". The goal is a replayable, governed, citation-ready diagnostic substrate that a future constrained AI agent could consume:
+
+- **Replayable** — every diagnosis is reproducible from frozen evidence, so claims can be checked.
+- **Governed** — the evaluation corpus grows only through human review and explicit promotion rules.
+- **Citation-ready** — evidence is typed and identified so an explanation layer can be forced to cite rather than invent.
+
+Even with that substrate in place, real-agent admission remains blocked until A3 policy hardening, A4 stable evidence citation/provenance hardening, A5 adversarial evaluation, operational isolation review, and human approval gates pass.
+
+KubeClaw is not the AI agent. It is the deterministic boundary a future AI infrastructure agent would need to sit behind.
+
 ## What it is
 
 - A **deterministic** diagnostic engine: the same frozen evidence always produces the same classification, confidence, hypothesis ranking, and report.
@@ -26,7 +42,7 @@ KubeClaw is a deterministic Kubernetes diagnostic engine designed around safety-
 | Not this | Why |
 | --- | --- |
 | A remediation tool | Strictly read-only. All write verbs are refused. |
-| An autonomous operator | No cluster mutation, no kubectl execution by the engine. |
+| An autonomous operator | No cluster mutation; the engine never invokes kubectl. |
 | A production live diagnosis system | No live diagnosis mode exists. Replay evidence is the source of truth; live capture is local-lab fixture generation only. |
 | An LLM agent | Engine logic is deterministic code, not model inference. No LLM/provider is called. |
 | Ready for real-agent admission | No. Admission remains blocked pending A3 policy hardening, A4 citation/provenance hardening, and A5 adversarial evaluation, plus human approval gates. |
@@ -67,7 +83,7 @@ Latest validation state of the private implementation repository:
 
 | Check | Result |
 | --- | --- |
-| Test suite (pytest) | 1194 passed, 1 skipped |
+| Test suite (pytest) | 1201 passed, 1 skipped |
 | Golden replay | 20/20 passed |
 | Holdout replay | 24/24 passed |
 | Calibration false high confidence (≥ 0.80) | 0 |
@@ -129,6 +145,13 @@ No real AI agent exists, no LLM/provider is called, no remediation is performed,
 - **AI may explain but not override** — the envelope is an immutable authority record; agent prose would live structurally outside it.
 
 Today this envelope validates deterministic OpenClaw-facing output only. It is a prerequisite for real-agent admission, not the admission itself.
+
+A complete example envelope is included in this repository:
+[sample-output/agent-safe-response-demo.json](sample-output/agent-safe-response-demo.json).
+It shows a validated `imagepull` diagnosis with deterministic evidence IDs
+(`ev-001`, …), the fixed safety assertions, and replay provenance. The sample
+demonstrates the deterministic authority envelope; it is not real-agent
+admission and contains no remediation or command fields — the schema has none.
 
 ---
 
@@ -200,5 +223,6 @@ The full implementation repository is currently private while the project is und
 | [sample-output/engine-imagepull-demo.txt](sample-output/engine-imagepull-demo.txt) | Normal deterministic diagnosis |
 | [sample-output/engine-drift-demo.txt](sample-output/engine-drift-demo.txt) | Drift recomputation and class flip |
 | [sample-output/engine-refusal-demo.txt](sample-output/engine-refusal-demo.txt) | Safety refusal (terminal) |
+| [sample-output/agent-safe-response-demo.json](sample-output/agent-safe-response-demo.json) | Validated `agent_safe_response/v1` diagnosis envelope (authority record, not real-agent admission) |
 | [sample-output/agent-consumer-demo.txt](sample-output/agent-consumer-demo.txt) | OpenClaw agent explanation layer |
 | [sample-output/llm-policy-demo.txt](sample-output/llm-policy-demo.txt) | LLM adapter prompt preview and policy rejection |
