@@ -50,7 +50,9 @@ KubeClaw refuses a request targeting a non-safe cluster context. Refusal is term
 
 **What to show:** [sample-output/agent-consumer-demo.txt](../sample-output/agent-consumer-demo.txt)
 
-A deterministic prototype that reads KubeClaw output and produces a safe human-readable explanation. Every explanation includes a safety boundary attestation:
+A deterministic prototype that reads KubeClaw output and produces a bounded
+human-readable explanation. Every built-in explanation includes a safety
+boundary attestation:
 
 - I did not call kubectl
 - I did not modify the cluster
@@ -58,13 +60,26 @@ A deterministic prototype that reads KubeClaw output and produces a safe human-r
 - I did not invent evidence
 - I did not execute remediation
 
-KubeClaw remains the diagnostic authority. The agent may explain but must not override, invent, mutate, or remediate.
+KubeClaw remains the diagnostic authority. The target boundary permits
+explanation but prohibits override, invention, mutation, and remediation. The
+current scaffold does not fully enforce that boundary and is not sufficient for
+real-agent admission.
+
+Deterministic OpenClaw output can also be mapped into the strict
+`agent_safe_response/v1` envelope and validated against the closed contract
+before being exposed. The envelope carries exactly one outcome (`diagnosis`,
+`insufficient_evidence`, or `refusal`), required drift/evidence/safety/
+provenance sections, and no remediation or command fields. This is OpenClaw
+output validation, not real-agent admission — admission remains blocked.
 
 ### LLM policy boundary
 
 **What to show:** [sample-output/llm-policy-demo.txt](../sample-output/llm-policy-demo.txt)
 
-An offline scaffold for a future LLM explanation layer. It builds prompts from KubeClaw results and validates candidate explanations against deterministic policy. No real LLM is called. Unsafe candidates that suggest kubectl remediation are rejected before they could reach a user.
+An offline scaffold for a future LLM explanation layer. It builds prompts from
+KubeClaw results and applies deterministic string/value checks to candidate
+explanations. No real LLM is called. The checks reject selected known
+remediation patterns, but semantic policy hardening remains required.
 
 ---
 
@@ -83,14 +98,15 @@ An offline scaffold for a future LLM explanation layer. It builds prompts from K
 See [safety-model.md](safety-model.md) for the full safety model. Key points:
 
 - Six-tool allowlist: `events_tail`, `describe_pod`, `describe_deploy`, `logs`, `get_yaml`, `top_pod`
-- Five incident classes: `crashloop`, `imagepull`, `pending`, `service_unreachable`, `oom`
+- Seven incident classes: `crashloop`, `imagepull`, `pending`, `service_unreachable`, `oom`, `probe_failure` (readiness/liveness grouped), `config_dependency_failure` (ConfigMap/Secret grouped)
 - Refusal is terminal — no diagnostic loop continues after refusal
 - Golden and holdout are governed corpora; generated sessions are unreviewed until promoted
 
 ### Evaluation model
 
-- **Golden corpus** is used for development regression.
-- **Holdout corpus** is evaluation-only. Engine behaviour must not be tuned against holdout results.
+- **Golden corpus** (20 sessions) is used for development regression.
+- **Holdout corpus** (24 sessions) is evaluation-only. Engine behaviour must not be tuned against holdout results.
+- **44 governed sessions total**; latest replay state is golden 20/20 and holdout 24/24, with zero false-high-confidence results in calibration.
 - **Calibration** evaluates base (non-drift) and drift metrics separately — never mixed as a single headline metric.
 
 ---
@@ -105,6 +121,12 @@ This is the strongest single-session demo. It shows diagnosis, drift, safety, an
 4. The top class changes deterministically from `crashloop` to `imagepull`. The `changed` flag is `true`.
 5. Confidence does not inflate. Post-drift confidence (0.76) is lower than pre-drift (0.88) because merged evidence contains contradictions.
 6. No remediation is executed. A human (or a future evaluated agent) decides what to do next.
+
+No real autonomous AI agent currently exists. The strict
+`agent_safe_response/v1` envelope and OpenClaw output validation are in place,
+but real-agent admission is blocked until policy hardening (A3), stable
+citation/provenance hardening (A4), adversarial evaluation (A5),
+operational-isolation review, and human-approval gates are complete.
 
 ---
 

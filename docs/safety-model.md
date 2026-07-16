@@ -1,6 +1,10 @@
 # KubeClaw Safety Model
 
-KubeClaw is designed so that safety is enforced in code, not prompts. No external agent, LLM, or caller can bypass the safety boundaries described here.
+KubeClaw's deterministic engine and runner safety are enforced in code, not
+prompts. Future agent-output enforcement is not yet complete: real-agent
+admission is currently blocked, and no real autonomous agent exists. This
+document describes enforced boundaries and documented targets; it does not
+claim that safety bypass by a future agent is already impossible.
 
 ## Read-only evidence capture
 
@@ -67,7 +71,9 @@ KubeClaw does not target production clusters. The optional kind lab is local-onl
 
 The diagnostic engine contains no LLM calls, no model inference, and no randomness. Classification, confidence scoring, and report generation are deterministic code.
 
-Future LLM layers (if added) sit **outside** the engine and are subject to separate policy validation. They may explain KubeClaw output but must not diagnose, remediate, or override engine results.
+Future LLM layers, if admitted after hardening and human approval, must sit
+**outside** the engine. The target boundary permits explanation but prohibits
+diagnosis, remediation, and engine-result override.
 
 ## Generated sessions are unreviewed until promoted
 
@@ -89,7 +95,7 @@ Non-drift and drift metrics are reported separately and never merged as a single
 
 ## Agent and LLM safety boundaries
 
-External agents that consume KubeClaw output must:
+Any future agent admitted to consume KubeClaw output must:
 
 - Preserve the KubeClaw diagnosis exactly (no class override, no confidence inflation)
 - Respect refusals as terminal
@@ -97,4 +103,26 @@ External agents that consume KubeClaw output must:
 - Avoid remediation language and kubectl mutation commands
 - Include a safety boundary attestation in every explanation
 
-These checks are enforced deterministically by the agent-consumer and LLM adapter policy layers in the private implementation repository.
+## Agent-safe response envelope
+
+A strict, closed contract — `agent_safe_response/v1` — defines the only shape
+of KubeClaw output a future agent would be allowed to consume:
+
+- Exactly one mutually exclusive outcome per response: `diagnosis`,
+  `insufficient_evidence`, or `refusal`.
+- Required drift, evidence, safety, and provenance sections.
+- No remediation, fix, action-plan, or command fields exist in the schema.
+- The AI may explain but not override: the envelope is an immutable authority
+  record, and agent prose would live structurally outside it.
+
+Deterministic OpenClaw output is mapped into this envelope and validated
+against the contract before being exposed; malformed envelopes fail closed.
+This validation currently applies to deterministic OpenClaw-facing output
+only — it is a prerequisite for real-agent admission, not real-agent admission
+itself. Real-agent admission remains blocked.
+
+The current private implementation additionally contains deterministic
+string/value policy scaffolds for selected cases. They do not yet enforce
+semantic evidence provenance or the complete response boundary and are not
+sufficient real-agent gates. Policy hardening, stable citation/provenance
+hardening, and adversarial evaluation remain future gates.

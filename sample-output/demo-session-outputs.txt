@@ -1,0 +1,74 @@
+============================================================
+  KubeClaw Diagnosis
+============================================================
+
+  session_id:          golden-imagepull-backoff
+  corpus:              golden
+  drift:               false
+  top_class:           imagepull
+  confidence:          0.88
+  insufficient_evidence: False
+
+  top hypotheses:
+    - imagepull: confidence=0.880
+  next_best_diagnostic: describe_pod: Describe pod events for image pull error details.
+
+  safety notes:
+    ✓ replay only — offline evidence, no live cluster
+    ✓ read-only — no write operations executed
+    ✓ no remediation executed
+    ✓ six-tool allowlist preserved
+
+---
+
+./.venv/bin/python scripts/demo_session.py holdout/sessions/drift-flip-01
+
+============================================================
+  KubeClaw Drift Diagnosis
+============================================================
+
+  session_id:          drift-flip-01
+  corpus:              holdout
+  drift:               true
+  top_class_before:    crashloop
+  confidence_before:   0.88
+  top_class_after:     imagepull
+  confidence_after:    0.76
+  changed:             True
+  drift_reasons:
+    - confidence decreased after drift recomputation
+    - post-drift evidence introduced contradiction
+    - top class changed from crashloop to imagepull
+  final_top_class:     imagepull
+  final_confidence:    0.76
+  insufficient_evidence: False
+
+  top hypotheses:
+    - imagepull: confidence=0.760
+    - crashloop: confidence=0.760
+  next_best_diagnostic: describe_pod: Describe pod events for image pull error details.
+
+  safety notes:
+    ✓ replay only — offline evidence, no live cluster
+    ✓ read-only — no write operations executed
+    ✓ no remediation executed
+    ✓ six-tool allowlist preserved
+
+---
+
+./.venv/bin/python scripts/demo_session.py golden/sessions/golden-refusal-unsafe-context
+
+============================================================
+  KubeClaw Refusal
+============================================================
+
+  session_id:          golden-refusal-unsafe-context
+  corpus:              golden
+  refused:             true
+  refusal_reason:      context_guard
+  explanation:         Kubernetes context 'prod-cluster' is not the required 'kind-kubeclaw' context. Pass an explicit unsafe override to target another context; KubeClaw will not do so silently.
+
+  safety notes:
+    ✓ refusal is terminal — no diagnostic loop continues after refusal
+    ✓ no remediation executed
+    ✓ replay only — offline evidence, no live cluster
