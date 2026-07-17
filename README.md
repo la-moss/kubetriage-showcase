@@ -1,14 +1,14 @@
-# KubeClaw
+# KubeTriage
 
-KubeClaw is a deterministic Kubernetes diagnostic engine designed around safety-first infrastructure automation.
+KubeTriage is a deterministic Kubernetes diagnostic engine designed around safety-first infrastructure automation.
 
-> KubeClaw is not an AI Kubernetes agent. It is a deterministic safety substrate that a future AI infrastructure agent could consume, once additional admission gates pass.
+> KubeTriage is not an AI Kubernetes agent. It is a deterministic safety substrate that a future AI infrastructure agent could consume, once additional admission gates pass.
 
 ## Why I built this
 
 AI agents near Kubernetes are risky in a specific way: a language model can sound confident while having no grounded evidence for its claims, no authority boundary separating its prose from the actual diagnosis, and no safe execution controls between its output and a cluster. An agent that hallucinates a root cause is bad; one that hallucinates a fix and runs it is worse.
 
-KubeClaw explores the opposite approach. Instead of starting with an AI agent and bolting safety on afterwards, it builds the deterministic diagnostic authority layer first — before any AI explanation layer is admitted. The engine decides what is diagnosed, at what confidence, from which evidence; any future AI layer would only be allowed to explain that result, never to override it.
+KubeTriage explores the opposite approach. Instead of starting with an AI agent and bolting safety on afterwards, it builds the deterministic diagnostic authority layer first — before any AI explanation layer is admitted. The engine decides what is diagnosed, at what confidence, from which evidence; any future AI layer would only be allowed to explain that result, never to override it.
 
 The goal is not "AI runs kubectl". The goal is a replayable, governed, citation-ready diagnostic substrate that a future constrained AI agent could consume:
 
@@ -18,7 +18,7 @@ The goal is not "AI runs kubectl". The goal is a replayable, governed, citation-
 
 Even with that substrate in place, real-agent admission remains blocked until A3 policy hardening, A4 stable evidence citation/provenance hardening, A5 adversarial evaluation, operational isolation review, and human approval gates pass.
 
-KubeClaw is not the AI agent. It is the deterministic boundary a future AI infrastructure agent would need to sit behind.
+KubeTriage is not the AI agent. It is the deterministic boundary a future AI infrastructure agent would need to sit behind.
 
 ## What it is
 
@@ -30,7 +30,7 @@ KubeClaw is not the AI agent. It is the deterministic boundary a future AI infra
 
 ## What it is not
 
-**KubeClaw itself is not AI.**
+**KubeTriage itself is not AI.**
 
 - It is not an LLM and contains **no LLM in the engine** — engine logic is deterministic code, not model inference.
 - It is not an autonomous Kubernetes agent. **No real autonomous AI agent exists** in this project.
@@ -51,13 +51,13 @@ KubeClaw is not the AI agent. It is the deterministic boundary a future AI infra
 
 Given frozen read-only evidence from a bounded set of diagnostic tools, KubeClaw validates and redacts inputs, extracts facts, classifies incidents, ranks hypotheses, computes calibrated confidence, optionally performs one bounded drift recheck, and produces reproducible reports.
 
-![KubeClaw architecture — deterministic Kubernetes diagnostics with safety by design](images/kubeclaw-diagram.png)
+![KubeTriage architecture — deterministic Kubernetes diagnostics with safety by design](images/kubeclaw-diagram.png)
 
 ---
 
 ## Current coverage
 
-KubeClaw currently supports **seven top-level deterministic incident classes**:
+KubeTriage currently supports **seven top-level deterministic incident classes**:
 
 | Class | Description |
 | --- | --- |
@@ -212,7 +212,7 @@ The full implementation repository is currently private while the project is und
 | Document | Purpose |
 | --- | --- |
 | [docs/architecture.md](docs/architecture.md) | Data flow, invariants, and component overview |
-| [docs/demo-walkthrough.md](docs/demo-walkthrough.md) | How to present KubeClaw in 3–10 minutes |
+| [docs/demo-walkthrough.md](docs/demo-walkthrough.md) | How to present KubeTriage in 3–10 minutes |
 | [docs/live-fixture-pipeline.md](docs/live-fixture-pipeline.md) | Optional local kind lab and read-only capture pipeline |
 | [docs/safety-model.md](docs/safety-model.md) | Safety boundaries, guards, and governance rules |
 
