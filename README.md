@@ -1,228 +1,284 @@
 # KubeTriage
 
-KubeTriage is a deterministic Kubernetes diagnostic engine designed around safety-first infrastructure automation.
+**Safe, explainable incident triage for Kubernetes.**
 
-> KubeTriage is not an AI Kubernetes agent. It is a deterministic safety substrate that a future AI infrastructure agent could consume, once additional admission gates pass.
+KubeTriage is a deterministic Kubernetes diagnostic engine built around one principle:
+
+> Evidence should decide the diagnosis. An AI explanation layer should never be allowed to override it.
+
+It reads frozen, read-only Kubernetes evidence, extracts typed facts, classifies supported incident types, ranks hypotheses, computes confidence, and produces reproducible reports. It does not remediate incidents, mutate clusters, call an LLM, or execute arbitrary commands.
+
+## Current status
+
+The deterministic hardening and adversarial evaluation programme is complete through **A5**.
+
+| Gate | Status |
+| --- | --- |
+| Golden replay corpus | **20/20 passed** |
+| Holdout replay corpus | **24/24 passed** |
+| A4A — run manifest and evidence identity | **Passed independent review** |
+| A4B — exact claim → fact → evidence provenance | **Passed independent review through H4** |
+| A5A — governed adversarial admission corpus | **102/102 passed** |
+| A5B — property and metamorphic evaluation | **67/67 passed** |
+| Unexpected adversarial admissions | **0** |
+| Capability leaks | **0** |
+| Renderer leaks | **0** |
+
+Real-agent admission remains **blocked**. There is no provider integration, no autonomous AI agent, no remediation, no live production diagnosis mode, and no cluster mutation path.
 
 ## Why I built this
 
-AI agents near Kubernetes are risky in a specific way: a language model can sound confident while having no grounded evidence for its claims, no authority boundary separating its prose from the actual diagnosis, and no safe execution controls between its output and a cluster. An agent that hallucinates a root cause is bad; one that hallucinates a fix and runs it is worse.
+AI agents near Kubernetes create a particular risk: a model can sound certain while having no grounded evidence for its diagnosis, no mechanical link between its prose and the system state, and no safe boundary between a suggestion and a cluster action.
 
-KubeTriage explores the opposite approach. Instead of starting with an AI agent and bolting safety on afterwards, it builds the deterministic diagnostic authority layer first — before any AI explanation layer is admitted. The engine decides what is diagnosed, at what confidence, from which evidence; any future AI layer would only be allowed to explain that result, never to override it.
+KubeTriage starts from the opposite direction.
 
-The goal is not "AI runs kubectl". The goal is a replayable, governed, citation-ready diagnostic substrate that a future constrained AI agent could consume:
+The deterministic diagnostic authority comes first:
 
-- **Replayable** — every diagnosis is reproducible from frozen evidence, so claims can be checked.
-- **Governed** — the evaluation corpus grows only through human review and explicit promotion rules.
-- **Citation-ready** — evidence is typed and identified so an explanation layer can be forced to cite rather than invent.
+```text
+frozen evidence
+→ typed facts
+→ deterministic classification
+→ ranked hypotheses
+→ confidence
+→ exact evidence provenance
+→ constrained operator-visible report
+```
 
-Even with that substrate in place, real-agent admission remains blocked until A3 policy hardening, A4 stable evidence citation/provenance hardening, A5 adversarial evaluation, operational isolation review, and human approval gates pass.
+A future AI layer could explain an admitted result, but it would not be allowed to change:
 
-KubeTriage is not the AI agent. It is the deterministic boundary a future AI infrastructure agent would need to sit behind.
+- the diagnosed class;
+- the confidence;
+- the refusal or insufficient-evidence outcome;
+- the drift result;
+- the supporting facts;
+- the evidence behind those facts.
 
-## What it is
+## What KubeTriage does
 
-- A **deterministic** diagnostic engine: the same frozen evidence always produces the same classification, confidence, hypothesis ranking, and report.
-- **Replay-first**: all diagnosis, testing, and evaluation run against frozen, reviewed replay evidence. No live cluster is required.
-- **Safety-first**: read-only by design, with context/namespace guards, a strict six-tool allowlist, redaction, and terminal refusals — all enforced in code, not prompts.
-- A **governed evaluation project**: golden and holdout corpora are managed under explicit governance rules, and calibration is reported honestly.
-- The deterministic boundary layer that a future, constrained AI explanation agent would need to sit behind.
+Given a frozen bundle of read-only Kubernetes tool outputs, KubeTriage:
 
-## What it is not
+1. validates and redacts the evidence;
+2. extracts typed facts with exact extraction-time citations;
+3. classifies the incident deterministically;
+4. ranks possible explanations;
+5. computes confidence from explicit evidence inputs;
+6. optionally performs one bounded drift recheck;
+7. produces JSON and Markdown reports;
+8. verifies a complete claim → fact → evidence chain before deterministic rendering.
 
-**KubeTriage itself is not AI.**
+The same evidence produces the same result. There is no hidden state, online learning, randomness, or wall-clock dependency.
 
-- It is not an LLM and contains **no LLM in the engine** — engine logic is deterministic code, not model inference.
-- It is not an autonomous Kubernetes agent. **No real autonomous AI agent exists** in this project.
-- It performs **no remediation** — all write and mutation verbs are refused; it never patches workloads or executes fixes.
-- It has **no live diagnosis mode** — replay evidence is the source of truth; live capture is an optional local-lab fixture pipeline only.
-- It does not let an LLM execute kubectl, and it makes no LLM/provider calls.
-- **Real-agent admission remains blocked**: an AI-agent boundary and a strict response envelope are documented and validated (see below), but the remaining policy, citation/provenance, and adversarial-evaluation gates are still deferred.
+## What it does not do
 
-| Not this | Why |
+| Not this | Current boundary |
 | --- | --- |
-| A remediation tool | Strictly read-only. All write verbs are refused. |
-| An autonomous operator | No cluster mutation; the engine never invokes kubectl. |
-| A production live diagnosis system | No live diagnosis mode exists. Replay evidence is the source of truth; live capture is local-lab fixture generation only. |
-| An LLM agent | Engine logic is deterministic code, not model inference. No LLM/provider is called. |
-| Ready for real-agent admission | No. Admission remains blocked pending A3 policy hardening, A4 citation/provenance hardening, and A5 adversarial evaluation, plus human approval gates. |
-| Complete Kubernetes incident coverage | No. Seven pattern-based top-level classes are covered; everything else returns `insufficient_evidence`. |
-| A replacement for human SREs | Produces reports and refusals; humans decide what to do next. |
+| Auto-remediator | It never applies, patches, deletes, scales, restarts, or executes fixes. |
+| LLM diagnostic engine | The engine contains no model calls. |
+| Kubernetes operator | It does not reconcile or mutate resources. |
+| Shell wrapper | Arbitrary shell execution is not permitted. |
+| Live production diagnosis service | Replay evidence is the source of truth. |
+| Unrestricted AI agent | No provider or autonomous agent is admitted. |
 
-Given frozen read-only evidence from a bounded set of diagnostic tools, KubeClaw validates and redacts inputs, extracts facts, classifies incidents, ranks hypotheses, computes calibrated confidence, optionally performs one bounded drift recheck, and produces reproducible reports.
+KubeTriage is the deterministic safety substrate a future constrained agent would need to sit behind.
 
-![KubeTriage architecture — deterministic Kubernetes diagnostics with safety by design](images/kubeclaw-diagram.png)
+## Incident coverage
 
----
-
-## Current coverage
-
-KubeTriage currently supports **seven top-level deterministic incident classes**:
+KubeTriage currently supports seven top-level deterministic incident classes:
 
 | Class | Description |
 | --- | --- |
 | `crashloop` | Container repeatedly fails and restarts |
-| `imagepull` | Image cannot be pulled from registry |
-| `oom` | Container killed by OOM killer |
+| `imagepull` | Image cannot be pulled from a registry |
+| `oom` | Container was killed by the OOM killer |
 | `pending` | Pod cannot be scheduled |
 | `service_unreachable` | Service has no reachable endpoints |
-| `probe_failure` | Readiness/liveness probe failure (grouped) |
-| `config_dependency_failure` | Missing/invalid ConfigMap or Secret dependency (grouped) |
+| `probe_failure` | Readiness or liveness probe failure |
+| `config_dependency_failure` | Missing or invalid ConfigMap or Secret dependency |
 
-Special outcomes: `insufficient_evidence` (a valid result when evidence does not support a confident single-class conclusion) and **refusal** (a terminal safety outcome).
+Special outcomes:
 
-This is deliberately **not complete Kubernetes incident coverage**. The seven classes are limited, pattern-based coverage of common failure modes. Multi-component failures, application-layer errors, persistent volume issues, admission controller rejections, and cluster-level network problems are not classified; the engine returns `insufficient_evidence` rather than guessing.
+- `insufficient_evidence` — the evidence does not support a confident single-class diagnosis;
+- `refusal` — the request violates the safety constitution or execution boundary.
 
----
-
-## Evaluation status
-
-The governed replay corpus currently contains **44 sessions**: **20 golden** (development regression) and **24 holdout** (evaluation-only, never tuned against).
-
-Latest validation state of the private implementation repository:
-
-| Check | Result |
-| --- | --- |
-| Test suite (pytest) | 1201 passed, 1 skipped |
-| Golden replay | 20/20 passed |
-| Holdout replay | 24/24 passed |
-| Calibration false high confidence (≥ 0.80) | 0 |
-| Drift confidence non-inflation violations | 0 |
-
-Calibration is evaluated against the holdout corpus with base (non-drift) and drift metrics reported separately, never merged into a single headline metric. No confidence tuning was performed against holdout results. ECE remains above its target on this small corpus — a documented small-corpus limitation, not a tuned-away number (see Known limitations).
-
-### Expansion pattern
-
-Coverage grows through a proven, repeatable, human-governed loop:
-
-```
-controlled kind lab
-  → read-only evidence capture
-  → generated replay session
-  → deterministic classifier support
-  → governed golden/holdout promotion
-  → calibration check
-```
-
-This loop has been applied end-to-end twice, adding `probe_failure` and then `config_dependency_failure` as governed top-level classes. Generated captures are never auto-promoted; every corpus addition passes human review, redaction, and governance rules.
-
----
+This is intentionally not complete Kubernetes incident coverage. Unsupported or ambiguous cases return `insufficient_evidence` rather than forcing a diagnosis.
 
 ## Safety model
 
 Safety is enforced in code, not prompts:
 
-- **Read-only** — all write and mutation verbs (`apply`, `patch`, `delete`, `exec`, `scale`, …) are blocked in the runner.
-- **Six-tool allowlist** — `events_tail`, `describe_pod`, `describe_deploy`, `logs`, `get_yaml`, `top_pod`; spoofed and unknown tools are rejected.
-- **Context and namespace guards** — non-lab cluster contexts and protected namespaces are refused.
-- **Terminal refusals** — after a refusal, no diagnostic loop continues and no remediation is attempted.
-- **Redaction** — secret data, tokens, and PEM material are redacted from evidence.
-- **Drift bound** — at most one drift recheck per session, always a full recomputation; confidence does not inflate after drift.
-- **Governed corpora** — golden and holdout are governed; generated captures are unreviewed until promoted.
+- strict six-tool allowlist;
+- read-only execution boundary;
+- context and namespace guards;
+- blocked write and mutation verbs;
+- spoofing, homoglyph and schema-deviation checks;
+- secret, token and PEM redaction;
+- bounded action and fact budgets;
+- terminal refusals;
+- one bounded drift recomputation;
+- no arbitrary shell execution;
+- no LLM in the diagnostic engine.
 
-See [docs/safety-model.md](docs/safety-model.md) for the full model. These properties describe the deterministic engine and runner; they are not a claim that every future agent-output path is already enforced.
+## Exact evidence provenance
 
----
+KubeTriage can mechanically verify this chain:
 
-## AI-agent readiness
-
-Where the project currently stands on the path toward a possible future constrained AI explanation layer:
-
-- **AI-agent boundary documented (A1).** The target authority, evidence, and output-policy boundary is written down: an admitted agent may explain but never override, invent, mutate, or remediate.
-- **Strict agent-safe envelope exists (A2A).** A closed `agent_safe_response/v1` contract defines what a future agent may consume (see below).
-- **OpenClaw output can be mapped and validated (A2B).** Deterministic OpenClaw replay output is mapped into the safe envelope and validated against the contract before being exposed. Malformed envelopes fail closed.
-- **Real-agent admission remains blocked.** A3 policy enforcement hardening, A4 stable evidence citation/provenance hardening, and A5 adversarial evaluation remain future gates, along with operational isolation review and explicit human approval.
-
-No real AI agent exists, no LLM/provider is called, no remediation is performed, and no live diagnosis mode exists. The documented boundary is a hardening target, not a fully enforced runtime guarantee — safety bypass by a future agent is treated as a risk to be engineered against, not something claimed to be already ruled out. OpenClaw/LLM policy enforcement is deliberately described as incomplete.
-
-### Safe response envelope
-
-`agent_safe_response/v1` is a closed, versioned contract for deterministic KubeClaw output that a future agent would consume:
-
-- **Exactly one outcome** per response: `diagnosis`, `insufficient_evidence`, or `refusal` — mutually exclusive, with inactive outcomes explicitly `null`.
-- **Required drift, evidence, safety, and provenance sections** — drift state with an exact before/after delta when triggered; typed evidence statements with identifiers and source references; fixed safety assertions (read-only, no remediation, no live diagnosis, no LLM in engine, no kubectl mutation); and session/corpus/review provenance.
-- **No remediation or command fields** — the schema has no place for fixes, action plans, executable commands, or agent-assigned confidence. Every object is closed (`additionalProperties: false`).
-- **AI may explain but not override** — the envelope is an immutable authority record; agent prose would live structurally outside it.
-
-Today this envelope validates deterministic OpenClaw-facing output only. It is a prerequisite for real-agent admission, not the admission itself.
-
-A complete example envelope is included in this repository:
-[sample-output/agent-safe-response-demo.json](sample-output/agent-safe-response-demo.json).
-It shows a validated `imagepull` diagnosis with deterministic evidence IDs
-(`ev-001`, …), the fixed safety assertions, and replay provenance. The sample
-demonstrates the deterministic authority envelope; it is not real-agent
-admission and contains no remediation or command fields — the schema has none.
-
----
-
-## Known limitations
-
-Honest limits of the current state:
-
-- **Limited incident class coverage** — seven pattern-based top-level classes; not complete Kubernetes incident coverage.
-- **Small but governed corpus** — 44 replay sessions total; small corpora limit statistical claims even under strict governance.
-- **ECE remains imperfect on the small corpus** — Expected Calibration Error is above its target; the confidence tiers cluster in two buckets and single sessions dominate bins. Constants were not tuned to hide this.
-- **A4-grade stable citations still deferred** — evidence identifiers are envelope-local; stable, machine-checkable citation identity and provenance hardening remain future work.
-- **A3 policy enforcement hardening still deferred** — current OpenClaw/LLM policy checks are deterministic string/value scaffolds, not sufficient real-agent gates.
-- **No real AI agent admitted** — real-agent admission remains blocked; no LLM/provider integration exists.
-- **No remediation** — KubeClaw never executes or recommends fixes; humans decide what to do next.
-
-The private implementation repository tracks the full list in its known-limitations document.
-
----
-
-## Next hardening steps
-
-Planned, in order — none of these are current guarantees:
-
-1. **A3 — policy enforcement hardening**: exact preservation of `top_class`, confidence, refusal, and drift across any explanation boundary; fail-closed handling of policy-invalid output; remediation-policy hardening beyond known command strings.
-2. **A4 — stable evidence citation and provenance hardening**: stable citation identifiers and mechanical rejection of uncited, altered, or unsupported claims.
-3. **A5 — adversarial evaluation**: prompt injection, status omission, class substitution, confidence manipulation, drift suppression, and refusal continuation testing.
-4. **Human approval gates** before any real agent or provider integration is considered.
-
----
-
-## Current demo flow
-
-```
-local kind cluster
-  → controlled broken workload
-  → read-only evidence capture
-  → generated replay session
-  → deterministic diagnosis
-  → validated agent_safe_response/v1 envelope (OpenClaw output validation)
-  → optional deterministic agent explanation scaffold
-  → optional LLM policy boundary scaffold
+```text
+rendered statement
+→ constrained claim
+→ replayed classifier or hypothesis contribution
+→ identity-bound support set
+→ typed fact
+→ exact JSON Pointer or UTF-8 byte range
+→ verified redacted evidence artifact
+→ sealed run manifest
 ```
 
-Most demos run fully offline against frozen replay evidence. No live cluster is required for diagnosis, evaluation, or the sample outputs in this repository.
+The provenance boundary includes:
 
-See [docs/demo-walkthrough.md](docs/demo-walkthrough.md) for a guided walkthrough and [sample-output/](sample-output/) for representative engine and agent outputs.
+- stable evidence-artifact identity;
+- stable typed-fact identity;
+- extraction-time citations rather than later text search;
+- UTF-8-safe byte ranges;
+- typed-value verification against selected evidence;
+- replayed classifier contributions;
+- independently recomputed contribution and support-set identities;
+- no fallback to a weaker policy after provenance failure;
+- renderer access only through an immutable validated capability.
 
----
+This is deterministic replay verification, not cryptographic authenticity or signed storage.
 
-## Repository note
+## Evaluation
 
-The full implementation repository is currently private while the project is under active development. This showcase repo documents the architecture, safety model, current status, and demo outputs.
+### Replay corpus
 
----
+The governed replay corpus contains **44 sessions**:
 
-## Documentation
+- **20 golden sessions** for development regression;
+- **24 holdout sessions** for evaluation only.
 
-| Document | Purpose |
-| --- | --- |
-| [docs/architecture.md](docs/architecture.md) | Data flow, invariants, and component overview |
-| [docs/demo-walkthrough.md](docs/demo-walkthrough.md) | How to present KubeTriage in 3–10 minutes |
-| [docs/live-fixture-pipeline.md](docs/live-fixture-pipeline.md) | Optional local kind lab and read-only capture pipeline |
-| [docs/safety-model.md](docs/safety-model.md) | Safety boundaries, guards, and governance rules |
+Latest results:
+
+| Metric | Result |
+| --- | ---: |
+| Golden replay | 20/20 |
+| Holdout replay | 24/24 |
+| Base top-1 accuracy | 100.0% |
+| Brier score | 0.0557 |
+| ECE | 0.2186 |
+| False high confidence | 0 |
+| Drift flip accuracy | 100.0% |
+| Drift non-inflation violations | 0 |
+
+ECE remains above target on a small corpus and is reported rather than tuned away.
+
+### A5A — governed adversarial admission corpus
+
+- **102/102 cases passed**
+- unexpected admissions: **0**
+- capability leaks: **0**
+- renderer leaks: **0**
+- frozen corpus digest: `60504978eaa046f9fe04b4c532ebf4c6039c74e2e42caa727312f384e370bb52`
+
+The corpus covers authority, manifest, artifact, pointer, fact, contribution, support-set, claim, drift, cross-run, capability, renderer, and coherent multi-step attacks.
+
+### A5B — property and metamorphic evaluation
+
+- **67/67 properties passed**
+- capability leaks: **0**
+- renderer leaks: **0**
+- nondeterministic repeats: **0**
+- frozen suite digest: `b367b02266444c0b680b28fb97ae60c197e4e00c2673aac3285fb82fcaebd124`
+
+The suite tests:
+
+- ordering invariance;
+- duplicate evidence amplification;
+- irrelevant noise;
+- operational metadata changes;
+- canonicalisation;
+- supporting-evidence removal;
+- truncation;
+- strengthening and conflicting evidence;
+- identity sensitivity;
+- refusal and insufficient-evidence safety;
+- drift behaviour;
+- repeat determinism;
+- capability sealing;
+- multi-step transformations.
+
+Confidence-removal evaluation distinguishes:
+
+- **pure support removal** — confidence must not increase;
+- **mixed-information removal** — support and confidence-dampening inputs changed together, so the exact confidence decomposition must explain the result.
+
+## Demo flow
+
+```text
+controlled local kind workload
+→ read-only evidence capture
+→ governed replay session
+→ deterministic diagnosis
+→ sealed authority and exact provenance
+→ constrained deterministic explanation
+```
+
+Most demos run fully offline against frozen replay evidence. No live cluster is required for diagnosis, testing, calibration, or adversarial evaluation.
+
+![KubeTriage architecture — deterministic Kubernetes diagnostics with safety by design](images/kubeclaw-diagram.png)
 
 ## Sample outputs
 
 | File | Demonstrates |
 | --- | --- |
-| [sample-output/engine-imagepull-demo.txt](sample-output/engine-imagepull-demo.txt) | Normal deterministic diagnosis |
-| [sample-output/engine-drift-demo.txt](sample-output/engine-drift-demo.txt) | Drift recomputation and class flip |
-| [sample-output/engine-refusal-demo.txt](sample-output/engine-refusal-demo.txt) | Safety refusal (terminal) |
-| [sample-output/agent-safe-response-demo.json](sample-output/agent-safe-response-demo.json) | Validated `agent_safe_response/v1` diagnosis envelope (authority record, not real-agent admission) |
-| [sample-output/agent-consumer-demo.txt](sample-output/agent-consumer-demo.txt) | OpenClaw agent explanation layer |
-| [sample-output/llm-policy-demo.txt](sample-output/llm-policy-demo.txt) | LLM adapter prompt preview and policy rejection |
+| [engine-imagepull-demo.txt](sample-output/engine-imagepull-demo.txt) | Normal deterministic diagnosis |
+| [engine-drift-demo.txt](sample-output/engine-drift-demo.txt) | Drift recomputation and class flip |
+| [engine-refusal-demo.txt](sample-output/engine-refusal-demo.txt) | Terminal safety refusal |
+| [agent-safe-response-demo.json](sample-output/agent-safe-response-demo.json) | Closed deterministic authority envelope |
+| [agent-consumer-demo.txt](sample-output/agent-consumer-demo.txt) | Constrained offline consumer shape |
+| [llm-policy-demo.txt](sample-output/llm-policy-demo.txt) | Offline policy-boundary demonstration |
+
+## Real-agent readiness
+
+The project now has a hardened deterministic authority and evaluation boundary, but that does not make it ready for unrestricted agent use.
+
+Remaining gates are operational and human-governed:
+
+- provider and model isolation;
+- authentication and authorisation;
+- tenant and credential boundaries;
+- request lifecycle and idempotency;
+- concurrency and resource limits;
+- audit retention and trace correlation;
+- admission revocation after regressions;
+- human-reviewed shadow operation;
+- explicit approval and kill-switch procedures.
+
+No real AI agent, provider SDK, remediation path, or cluster-mutation capability exists in this project.
+
+## Known limitations
+
+- Seven pattern-based incident classes, not complete Kubernetes coverage.
+- Replay is the diagnostic source of truth; there is no production live-diagnosis service.
+- The corpus is deliberately small, limiting statistical calibration claims.
+- ECE remains above target on the current holdout corpus.
+- Tool-failure facts fail closed for evidence-backed explanation admission.
+- Evaluation covers governed known attacks and declared transformations; it is not formal verification.
+- No cryptographic signing or authenticity layer.
+- Real-agent admission remains blocked.
+
+## Repository note
+
+The full implementation repository remains private while operational admission work is still under development. This public showcase documents the architecture, safety boundary, evaluation results, and representative outputs.
+
+## Documentation
+
+| Document | Purpose |
+| --- | --- |
+| [Architecture](docs/architecture.md) | Data flow, invariants and component overview |
+| [Demo walkthrough](docs/demo-walkthrough.md) | Guided 3–10 minute demonstration |
+| [Live fixture pipeline](docs/live-fixture-pipeline.md) | Optional local kind lab and read-only capture |
+| [Safety model](docs/safety-model.md) | Safety boundaries, guards and governance rules |
+
+---
+
+**KubeTriage does not try to make Kubernetes autonomous. It tries to make diagnosis reproducible, bounded, and difficult to fake.**
