@@ -1,5 +1,5 @@
 ============================================================
-  KubeClaw Diagnosis
+  KubeTriage Diagnosis
 ============================================================
 
   session_id:          golden-imagepull-backoff
@@ -19,12 +19,9 @@
     ✓ no remediation executed
     ✓ six-tool allowlist preserved
 
----
-
-./.venv/bin/python scripts/demo_session.py holdout/sessions/drift-flip-01
 
 ============================================================
-  KubeClaw Drift Diagnosis
+  KubeTriage Drift Diagnosis
 ============================================================
 
   session_id:          drift-flip-01
@@ -54,21 +51,19 @@
     ✓ no remediation executed
     ✓ six-tool allowlist preserved
 
----
-
-./.venv/bin/python scripts/demo_session.py golden/sessions/golden-refusal-unsafe-context
 
 ============================================================
-  KubeClaw Refusal
+  KubeTriage Refusal
 ============================================================
 
   session_id:          golden-refusal-unsafe-context
   corpus:              golden
   refused:             true
   refusal_reason:      context_guard
-  explanation:         Kubernetes context 'prod-cluster' is not the required 'kind-kubeclaw' context. Pass an explicit unsafe override to target another context; KubeClaw will not do so silently.
+  explanation:         Kubernetes context 'prod-cluster' is not the required 'kind-kubetriage' context. Pass an explicit unsafe override to target another context; KubeTriage will not do so silently.
 
   safety notes:
     ✓ refusal is terminal — no diagnostic loop continues after refusal
     ✓ no remediation executed
     ✓ replay only — offline evidence, no live cluster
+

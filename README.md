@@ -1,284 +1,622 @@
 # KubeTriage
 
-**Safe, explainable incident triage for Kubernetes.**
+**A safe, evidence-based way to investigate Kubernetes incidents.**
 
-KubeTriage is a deterministic Kubernetes diagnostic engine built around one principle:
+When an application running on Kubernetes breaks, the first challenge is working
+out what actually happened.
 
-> Evidence should decide the diagnosis. An AI explanation layer should never be allowed to override it.
+Logs, events and configuration can point in different directions. A confident
+explanation is not necessarily a correct one, and an incorrect diagnosis becomes
+more dangerous when software is also allowed to act on it.
 
-It reads frozen, read-only Kubernetes evidence, extracts typed facts, classifies supported incident types, ranks hypotheses, computes confidence, and produces reproducible reports. It does not remediate incidents, mutate clusters, call an LLM, or execute arbitrary commands.
+KubeTriage investigates incidents from a frozen set of read-only evidence. It
+extracts the relevant facts, identifies the most likely failure, records its
+confidence, and shows which evidence supports its conclusions.
 
-## Current status
+Think of it as an incident investigator working from a sealed evidence file:
 
-The deterministic hardening and adversarial evaluation programme is complete through **A5**.
+- the evidence cannot change halfway through the investigation;
+- the same case can be replayed;
+- another person can inspect how the conclusion was reached;
+- unsupported conclusions are rejected rather than presented as fact.
 
-| Gate | Status |
-| --- | --- |
-| Golden replay corpus | **20/20 passed** |
-| Holdout replay corpus | **24/24 passed** |
-| A4A — run manifest and evidence identity | **Passed independent review** |
-| A4B — exact claim → fact → evidence provenance | **Passed independent review through H4** |
-| A5A — governed adversarial admission corpus | **102/102 passed** |
-| A5B — property and metamorphic evaluation | **67/67 passed** |
-| Unexpected adversarial admissions | **0** |
-| Capability leaks | **0** |
-| Renderer leaks | **0** |
+KubeTriage does not fix the incident, run commands against the cluster or allow
+an AI model to decide the diagnosis. It is deliberately read-only and
+deterministic: **the same evidence produces the same result every time.**
 
-Real-agent admission remains **blocked**. There is no provider integration, no autonomous AI agent, no remediation, no live production diagnosis mode, and no cluster mutation path.
+> KubeTriage is not an autonomous Kubernetes agent. It is the deterministic
+> diagnostic authority that a future constrained explanation layer could sit
+> behind.
 
-## Why I built this
+---
 
-AI agents near Kubernetes create a particular risk: a model can sound certain while having no grounded evidence for its diagnosis, no mechanical link between its prose and the system state, and no safe boundary between a suggestion and a cluster action.
+## Why this project exists
 
-KubeTriage starts from the opposite direction.
+AI models can produce clear and convincing explanations, but clarity is not the
+same as correctness.
 
-The deterministic diagnostic authority comes first:
+Near critical infrastructure, an explanation should not be allowed to:
 
-```text
-frozen evidence
-→ typed facts
-→ deterministic classification
-→ ranked hypotheses
-→ confidence
-→ exact evidence provenance
-→ constrained operator-visible report
-```
+- invent evidence;
+- change the diagnosed problem;
+- increase the confidence;
+- continue after a safety refusal;
+- turn a suggestion into a cluster action;
+- hide where its claims came from.
 
-A future AI layer could explain an admitted result, but it would not be allowed to change:
+KubeTriage separates diagnosis from explanation.
 
-- the diagnosed class;
-- the confidence;
-- the refusal or insufficient-evidence outcome;
-- the drift result;
-- the supporting facts;
-- the evidence behind those facts.
+The deterministic engine decides:
+
+- what happened;
+- how confident the diagnosis is;
+- which facts support it;
+- whether the evidence is insufficient;
+- whether the request must be refused.
+
+A future AI layer may be allowed to explain an admitted result, but it would not
+be allowed to change it.
+
+---
 
 ## What KubeTriage does
 
-Given a frozen bundle of read-only Kubernetes tool outputs, KubeTriage:
+Given a frozen bundle of read-only Kubernetes evidence, KubeTriage:
 
-1. validates and redacts the evidence;
-2. extracts typed facts with exact extraction-time citations;
-3. classifies the incident deterministically;
-4. ranks possible explanations;
-5. computes confidence from explicit evidence inputs;
-6. optionally performs one bounded drift recheck;
-7. produces JSON and Markdown reports;
-8. verifies a complete claim → fact → evidence chain before deterministic rendering.
+1. validates the request and the supplied evidence;
+2. redacts secrets, tokens and other sensitive material;
+3. extracts typed facts from events, logs and resource descriptions;
+4. compares those facts against supported incident types;
+5. ranks the most likely explanations;
+6. calculates confidence from explicit evidence inputs;
+7. optionally performs one bounded drift recheck when new evidence appears;
+8. produces a structured report;
+9. links every constrained conclusion back to verified facts and exact evidence.
 
-The same evidence produces the same result. There is no hidden state, online learning, randomness, or wall-clock dependency.
+Because the evidence is frozen, the investigation can be replayed exactly.
 
-## What it does not do
+There is no hidden state, online learning, randomness or wall-clock dependency.
 
-| Not this | Current boundary |
+---
+
+## What KubeTriage does not do
+
+| KubeTriage is not | Current boundary |
 | --- | --- |
-| Auto-remediator | It never applies, patches, deletes, scales, restarts, or executes fixes. |
-| LLM diagnostic engine | The engine contains no model calls. |
-| Kubernetes operator | It does not reconcile or mutate resources. |
-| Shell wrapper | Arbitrary shell execution is not permitted. |
-| Live production diagnosis service | Replay evidence is the source of truth. |
-| Unrestricted AI agent | No provider or autonomous agent is admitted. |
+| An auto-remediator | It does not apply, patch, delete, restart, scale or execute fixes. |
+| A Kubernetes operator | It does not reconcile resources or change cluster state. |
+| An LLM diagnostic engine | The diagnosis engine contains no model calls or provider SDKs. |
+| A shell wrapper | Arbitrary commands and shell execution are not permitted. |
+| A live production diagnostic service | Replay evidence remains the diagnostic source of truth. |
+| An autonomous AI agent | No real autonomous agent has been admitted. |
+| Complete Kubernetes incident coverage | It supports seven bounded incident classes and returns `insufficient_evidence` for unsupported cases. |
+| A replacement for an SRE | It provides evidence-backed reports; a human decides what to do next. |
 
-KubeTriage is the deterministic safety substrate a future constrained agent would need to sit behind.
+Safety is enforced in code, not prompts.
 
-## Incident coverage
+---
 
-KubeTriage currently supports seven top-level deterministic incident classes:
+## Current diagnostic coverage
 
-| Class | Description |
+KubeTriage currently supports seven top-level incident classes:
+
+| Class | What it means |
 | --- | --- |
-| `crashloop` | Container repeatedly fails and restarts |
-| `imagepull` | Image cannot be pulled from a registry |
-| `oom` | Container was killed by the OOM killer |
-| `pending` | Pod cannot be scheduled |
-| `service_unreachable` | Service has no reachable endpoints |
-| `probe_failure` | Readiness or liveness probe failure |
-| `config_dependency_failure` | Missing or invalid ConfigMap or Secret dependency |
+| `crashloop` | A container repeatedly fails and restarts |
+| `imagepull` | A container image cannot be downloaded from the registry |
+| `oom` | A container has been killed because it ran out of memory |
+| `pending` | A pod cannot be scheduled |
+| `service_unreachable` | A service has no reachable endpoints |
+| `probe_failure` | A readiness or liveness health check is failing |
+| `config_dependency_failure` | A required ConfigMap or Secret is missing or invalid |
 
-Special outcomes:
+KubeTriage also has two important non-diagnostic outcomes:
 
-- `insufficient_evidence` — the evidence does not support a confident single-class diagnosis;
-- `refusal` — the request violates the safety constitution or execution boundary.
+- `insufficient_evidence` — the evidence does not justify a confident conclusion;
+- `refusal` — the request violates a safety rule and processing stops.
 
-This is intentionally not complete Kubernetes incident coverage. Unsupported or ambiguous cases return `insufficient_evidence` rather than forcing a diagnosis.
+This is deliberately limited coverage. KubeTriage does not guess when a failure
+does not match one of the supported classes.
 
-## Safety model
+---
 
-Safety is enforced in code, not prompts:
+## How it works
 
-- strict six-tool allowlist;
-- read-only execution boundary;
+```text
+Frozen read-only evidence
+        ↓
+Validation and redaction
+        ↓
+Typed fact extraction
+        ↓
+Deterministic classification
+        ↓
+Hypothesis ranking
+        ↓
+Confidence calculation
+        ↓
+Optional bounded drift recheck
+        ↓
+Evidence-backed report
+        ↓
+Provenance and policy validation
+        ↓
+Deterministic operator-visible output
+```
+
+The engine follows an enforced state machine:
+
+```text
+SIGNAL_INGESTION
+→ FACT_EXTRACTION
+→ CLASSIFICATION
+→ HYPOTHESIS_RANKING
+→ CONFIDENCE_SCORING
+→ STOP_OR_NEXT
+→ [DRIFT_RECHECK → FACT_EXTRACTION → …]
+→ FINAL_REPORT
+```
+
+A drift recheck is a complete recomputation from the updated evidence. KubeTriage
+does not patch the previous answer or allow confidence to inflate after drift.
+
+![KubeTriage architecture](images/kubeclaw-diagram.png)
+
+---
+
+## Replay is the source of truth
+
+Most diagnostic systems are tested against live environments that continue to
+change while the test is running.
+
+KubeTriage takes a different approach.
+
+Each incident is represented by a frozen evidence bundle containing the outputs
+of a bounded set of read-only diagnostic tools. The same incident can then be
+replayed repeatedly.
+
+This makes it possible to ask:
+
+- Does the same evidence still produce the same diagnosis?
+- Did a code change alter confidence?
+- Did a harmless ordering change affect the answer?
+- Can a forged fact or swapped evidence file bypass validation?
+- Does removing evidence make the system incorrectly more confident?
+
+Replay makes those questions testable.
+
+---
+
+## Read-only safety boundary
+
+KubeTriage permits six logical diagnostic tools:
+
+- `events_tail`
+- `describe_pod`
+- `describe_deploy`
+- `logs`
+- `get_yaml`
+- `top_pod`
+
+The runner enforces:
+
+- a strict tool allowlist;
 - context and namespace guards;
 - blocked write and mutation verbs;
-- spoofing, homoglyph and schema-deviation checks;
+- spoofed tool-name detection;
+- homoglyph and malformed-input rejection;
+- schema validation;
 - secret, token and PEM redaction;
 - bounded action and fact budgets;
-- terminal refusals;
-- one bounded drift recomputation;
-- no arbitrary shell execution;
-- no LLM in the diagnostic engine.
+- terminal safety refusals.
 
-## Exact evidence provenance
+Write operations such as `apply`, `patch`, `delete`, `exec`, `scale`,
+`rollout restart`, `cordon` and `drain` are not permitted.
 
-KubeTriage can mechanically verify this chain:
+---
+
+## Showing where every conclusion came from
+
+KubeTriage does not only produce a diagnosis. It records a machine-checkable
+chain showing how that diagnosis was reached.
+
+In plain English:
 
 ```text
-rendered statement
-→ constrained claim
-→ replayed classifier or hypothesis contribution
-→ identity-bound support set
+This conclusion
+→ came from this fact
+→ extracted from this exact part of the evidence
+→ inside this evidence artifact
+→ captured during this diagnostic run
+```
+
+The current provenance-aware path is:
+
+```text
+canonical redacted evidence artifact
+→ exact extraction event
+→ exact citation
 → typed fact
-→ exact JSON Pointer or UTF-8 byte range
-→ verified redacted evidence artifact
-→ sealed run manifest
+→ replayed classifier contribution
+→ identity-bound support set
+→ constrained claim
+→ provenance-aware policy validation
+→ immutable validated capability
+→ deterministic renderer
 ```
 
-The provenance boundary includes:
+This means the validator does not simply trust a submitted explanation.
 
-- stable evidence-artifact identity;
-- stable typed-fact identity;
-- extraction-time citations rather than later text search;
-- UTF-8-safe byte ranges;
-- typed-value verification against selected evidence;
-- replayed classifier contributions;
-- independently recomputed contribution and support-set identities;
-- no fallback to a weaker policy after provenance failure;
-- renderer access only through an immutable validated capability.
+It independently checks:
 
-This is deterministic replay verification, not cryptographic authenticity or signed storage.
+- that the evidence body matches its recorded identity;
+- that the cited location exists;
+- that byte ranges do not split UTF-8 characters;
+- that the typed value really comes from the selected evidence;
+- that the classifier contribution can be replayed from the verified facts;
+- that the support set contains the correct contributing facts;
+- that each claim is compatible with its evidence;
+- that rejected output cannot reach the renderer.
 
-## Evaluation
+This provides deterministic integrity checking. It is not a claim of
+cryptographic authenticity, signed storage or tamper-proof infrastructure.
 
-### Replay corpus
+---
 
-The governed replay corpus contains **44 sessions**:
+## How KubeTriage has been tested
 
-- **20 golden sessions** for development regression;
-- **24 holdout sessions** for evaluation only.
+The governed replay corpus contains:
 
-Latest results:
+| Corpus | Sessions | Purpose |
+| --- | ---: | --- |
+| Golden | 20 | Development regression |
+| Holdout | 24 | Evaluation-only; never tuned against |
+| Total | 44 | Frozen, governed replay sessions |
 
-| Metric | Result |
+Current replay results:
+
+| Check | Result |
 | --- | ---: |
-| Golden replay | 20/20 |
-| Holdout replay | 24/24 |
-| Base top-1 accuracy | 100.0% |
-| Brier score | 0.0557 |
-| ECE | 0.2186 |
-| False high confidence | 0 |
-| Drift flip accuracy | 100.0% |
-| Drift non-inflation violations | 0 |
+| Golden replay | **20/20 passed** |
+| Holdout replay | **24/24 passed** |
+| Base top-1 accuracy | **100%** |
+| Brier score | **0.0557** |
+| Expected Calibration Error | **0.2186** |
+| False high-confidence results | **0** |
+| Drift post-recheck accuracy | **100%** |
+| Drift flip accuracy | **100%** |
+| Drift confidence non-inflation violations | **0** |
 
-ECE remains above target on a small corpus and is reported rather than tuned away.
+The calibration corpus is small, so these figures should not be read as broad
+production-performance claims. ECE remains above its target and is documented
+rather than tuned away.
 
-### A5A — governed adversarial admission corpus
+---
 
-- **102/102 cases passed**
-- unexpected admissions: **0**
-- capability leaks: **0**
-- renderer leaks: **0**
-- frozen corpus digest: `60504978eaa046f9fe04b4c532ebf4c6039c74e2e42caa727312f384e370bb52`
+## Adversarial evaluation
 
-The corpus covers authority, manifest, artifact, pointer, fact, contribution, support-set, claim, drift, cross-run, capability, renderer, and coherent multi-step attacks.
+KubeTriage includes a governed adversarial corpus designed to attack the
+diagnostic and explanation boundary.
 
-### A5B — property and metamorphic evaluation
+Examples include:
 
-- **67/67 properties passed**
-- capability leaks: **0**
-- renderer leaks: **0**
-- nondeterministic repeats: **0**
-- frozen suite digest: `b367b02266444c0b680b28fb97ae60c197e4e00c2673aac3285fb82fcaebd124`
+- swapping evidence between incidents;
+- changing fact values;
+- forging citations;
+- replacing support sets;
+- removing real contributors;
+- inserting contributors from another incident class;
+- changing drift state;
+- rewriting identities and recalculating outer digests;
+- attempting to render rejected output;
+- crossing data between different runs.
 
-The suite tests:
+The important cases do not rely on leaving an obviously stale checksum behind.
+They recompute dependent identifiers and digests so that validation must reject
+the attack for a semantic reason.
 
-- ordering invariance;
-- duplicate evidence amplification;
-- irrelevant noise;
-- operational metadata changes;
-- canonicalisation;
-- supporting-evidence removal;
-- truncation;
-- strengthening and conflicting evidence;
-- identity sensitivity;
-- refusal and insufficient-evidence safety;
-- drift behaviour;
-- repeat determinism;
-- capability sealing;
-- multi-step transformations.
+Current result:
 
-Confidence-removal evaluation distinguishes:
+| A5A adversarial corpus | Result |
+| --- | ---: |
+| Total governed cases | **102** |
+| Passed | **102/102** |
+| Unexpected admissions | **0** |
+| Capability leaks | **0** |
+| Renderer leaks | **0** |
 
-- **pure support removal** — confidence must not increase;
-- **mixed-information removal** — support and confidence-dampening inputs changed together, so the exact confidence decomposition must explain the result.
-
-## Demo flow
+Frozen corpus digest:
 
 ```text
-controlled local kind workload
-→ read-only evidence capture
-→ governed replay session
-→ deterministic diagnosis
-→ sealed authority and exact provenance
-→ constrained deterministic explanation
+60504978eaa046f9fe04b4c532ebf4c6039c74e2e42caa727312f384e370bb52
 ```
 
-Most demos run fully offline against frozen replay evidence. No live cluster is required for diagnosis, testing, calibration, or adversarial evaluation.
+---
 
-![KubeTriage architecture — deterministic Kubernetes diagnostics with safety by design](images/kubeclaw-diagram.png)
+## Property and metamorphic evaluation
 
-## Sample outputs
+KubeTriage is also tested by transforming valid incidents and checking how the
+result should relate to the original.
 
-| File | Demonstrates |
-| --- | --- |
-| [engine-imagepull-demo.txt](sample-output/engine-imagepull-demo.txt) | Normal deterministic diagnosis |
-| [engine-drift-demo.txt](sample-output/engine-drift-demo.txt) | Drift recomputation and class flip |
-| [engine-refusal-demo.txt](sample-output/engine-refusal-demo.txt) | Terminal safety refusal |
-| [agent-safe-response-demo.json](sample-output/agent-safe-response-demo.json) | Closed deterministic authority envelope |
-| [agent-consumer-demo.txt](sample-output/agent-consumer-demo.txt) | Constrained offline consumer shape |
-| [llm-policy-demo.txt](sample-output/llm-policy-demo.txt) | Offline policy-boundary demonstration |
+This is sometimes called metamorphic testing. In ordinary language, it asks
+questions such as:
 
-## Real-agent readiness
+- Does reordering the evidence change the diagnosis?
+- Can duplicated evidence make the system more confident?
+- Can unrelated noise affect the winning class?
+- Do operational IDs alter stable evidence identity?
+- Does removing supporting evidence make the diagnosis stronger?
+- Does the same incident produce identical output across repeated runs?
 
-The project now has a hardened deterministic authority and evaluation boundary, but that does not make it ready for unrestricted agent use.
+Current result:
 
-Remaining gates are operational and human-governed:
+| A5B property suite | Result |
+| --- | ---: |
+| Total governed properties | **67** |
+| Passed | **67/67** |
+| Capability leaks | **0** |
+| Renderer leaks | **0** |
+| Nondeterministic repeat failures | **0** |
+
+Frozen suite digest:
+
+```text
+b367b02266444c0b680b28fb97ae60c197e4e00c2673aac3285fb82fcaebd124
+```
+
+### Evidence removal and confidence
+
+A5B found an important distinction.
+
+Removing only positive support must not increase confidence.
+
+However, removing an evidence source may sometimes remove both:
+
+- supporting information; and
+- information that was reducing confidence.
+
+That is a mixed-information change, so there is no honest universal rule saying
+confidence must always decrease.
+
+KubeTriage now records a confidence decomposition so the change can be explained
+mechanically.
+
+For the reviewed probe example:
+
+```text
+Before removal:
+  confidence: 0.72
+  evidence quality: mixed strong and weak
+  mixed-evidence dampening: 0.16
+
+After removing describe_pod:
+  confidence: 0.88
+  evidence quality: strong only
+  mixed-evidence dampening: 0.00
+```
+
+The increase is fully explained by the removal of weak-evidence dampening.
+
+This case is classified as mixed-information removal, not as proof that less
+evidence should normally increase confidence.
+
+Separate pure-support-removal tests cover all seven incident classes and require
+confidence to remain equal or decrease.
+
+---
+
+## AI-agent readiness
+
+KubeTriage itself is not an AI agent.
+
+The project now has a strongly constrained boundary that a future explanation
+layer could consume, including:
+
+- a closed response envelope;
+- immutable authority records;
+- exact claim-to-evidence provenance;
+- deterministic policy enforcement;
+- contribution replay;
+- support-set identity validation;
+- adversarial testing;
+- property and transformation testing;
+- deterministic rendering.
+
+That still does not mean a real agent should be connected.
+
+Real-agent admission remains blocked because operational questions still need to
+be addressed, including:
 
 - provider and model isolation;
 - authentication and authorisation;
-- tenant and credential boundaries;
+- tenant separation;
+- rate and concurrency limits;
 - request lifecycle and idempotency;
-- concurrency and resource limits;
-- audit retention and trace correlation;
-- admission revocation after regressions;
-- human-reviewed shadow operation;
-- explicit approval and kill-switch procedures.
+- audit retention;
+- trace correlation;
+- revocation and kill-switch procedures;
+- human approval;
+- operational failure handling;
+- shadow-mode evaluation.
 
-No real AI agent, provider SDK, remediation path, or cluster-mutation capability exists in this project.
+There is currently:
 
-## Known limitations
+- no real LLM provider integration;
+- no autonomous AI agent;
+- no cluster credentials exposed to a model;
+- no live production diagnosis mode;
+- no remediation;
+- no kubectl mutation path.
 
-- Seven pattern-based incident classes, not complete Kubernetes coverage.
-- Replay is the diagnostic source of truth; there is no production live-diagnosis service.
-- The corpus is deliberately small, limiting statistical calibration claims.
-- ECE remains above target on the current holdout corpus.
-- Tool-failure facts fail closed for evidence-backed explanation admission.
-- Evaluation covers governed known attacks and declared transformations; it is not formal verification.
-- No cryptographic signing or authenticity layer.
-- Real-agent admission remains blocked.
+---
+
+## Current project status
+
+| Gate | Status |
+| --- | --- |
+| Deterministic diagnostic engine | **Complete** |
+| Replay harness | **Complete** |
+| Golden and holdout corpora | **Complete** |
+| Calibration evaluation | **Complete** |
+| Strict safe-response envelope | **Complete** |
+| Constrained explanation policy | **Complete** |
+| Immutable run manifest and stable evidence identity | **Passed independent review** |
+| Exact claim → fact → evidence provenance | **Passed independent review through H4** |
+| Governed adversarial admission corpus | **Passed independent review — 102/102** |
+| Property and metamorphic evaluation | **Passed independent review — 67/67** |
+| A5 adversarial evaluation programme | **Complete** |
+| Real-agent admission | **Blocked** |
+| Remediation or cluster mutation | **Not implemented** |
+
+---
+
+## Sample outputs
+
+| Sample | What it demonstrates |
+| --- | --- |
+| [Image-pull diagnosis](sample-output/engine-imagepull-demo.txt) | Normal deterministic diagnosis |
+| [Drift class flip](sample-output/engine-drift-demo.txt) | Full drift recomputation and confidence non-inflation |
+| [Safety refusal](sample-output/engine-refusal-demo.txt) | Terminal refusal for an unsafe request |
+| [Safe response envelope](sample-output/agent-safe-response-demo.json) | Earlier closed `agent_safe_response/v1` authority envelope |
+| [Deterministic consumer explanation](sample-output/agent-consumer-demo.txt) | Offline explanation scaffold; not a real AI agent |
+| [LLM policy rejection](sample-output/llm-policy-demo.txt) | Offline legacy policy demonstration; no real LLM is called |
+
+The safe-response and LLM-policy examples represent earlier boundary milestones.
+The private implementation now also contains the later provenance-aware v3
+admission path described above.
+
+---
+
+## Demo flow
+
+The main demonstration uses three frozen incidents:
+
+### 1. Normal diagnosis
+
+An image-pull failure is classified as `imagepull` with confidence `0.88`.
+
+This demonstrates:
+
+- deterministic diagnosis;
+- hypothesis ranking;
+- read-only operation;
+- reproducible reporting.
+
+### 2. Drift recomputation
+
+Initial evidence supports `crashloop`.
+
+New evidence introduces stronger image-pull signals, so KubeTriage recomputes
+the full incident and changes the top class to `imagepull`.
+
+This demonstrates:
+
+- one bounded drift recheck;
+- complete recomputation;
+- class change when evidence changes;
+- confidence non-inflation;
+- preserved provenance.
+
+### 3. Safety refusal
+
+A request targeting an unsafe cluster context is refused.
+
+This demonstrates:
+
+- safety enforced in code;
+- refusal as a successful terminal outcome;
+- no diagnostic continuation;
+- no remediation attempt.
+
+See [docs/demo-walkthrough.md](docs/demo-walkthrough.md).
+
+---
+
+## Optional local fixture lab
+
+The implementation repository includes an optional local `kind` lab for
+creating controlled broken workloads and capturing read-only evidence.
+
+The flow is:
+
+```text
+local kind cluster
+→ controlled broken workload
+→ read-only evidence capture
+→ generated replay session
+→ human review and redaction
+→ governed corpus promotion
+→ offline replay diagnosis
+```
+
+Live capture is not the diagnostic authority.
+
+Generated sessions are unreviewed and are not evaluation material until they
+have been inspected and promoted under corpus governance.
+
+No live Kubernetes cluster is required for the normal demo, tests or evaluation.
+
+---
+
+## Honest limitations
+
+KubeTriage currently has important limits:
+
+- it supports seven pattern-based incident classes;
+- it does not cover every Kubernetes failure mode;
+- the replay corpus is governed but small;
+- ECE remains above its target;
+- confidence uses a small number of deterministic tiers;
+- arbitrary evidence removal does not have a universal confidence direction;
+- deterministic integrity is not cryptographic authenticity;
+- the implementation repository remains private;
+- there is no real provider or model integration;
+- there is no production live-diagnosis service;
+- there is no remediation or mutation path;
+- real-agent admission remains blocked.
+
+The system returns `insufficient_evidence` rather than guessing when the
+available evidence does not justify a supported diagnosis.
+
+---
 
 ## Repository note
 
-The full implementation repository remains private while operational admission work is still under development. This public showcase documents the architecture, safety boundary, evaluation results, and representative outputs.
+This showcase repository documents:
+
+- the project’s purpose;
+- the architecture;
+- the safety model;
+- the current evaluation status;
+- representative outputs.
+
+The full implementation repository remains private while the project is under
+active development.
+
+The showcase does not include:
+
+- implementation source code;
+- private test suites;
+- governed replay corpora;
+- raw Kubernetes evidence;
+- cluster credentials;
+- provider integration.
+
+---
 
 ## Documentation
 
 | Document | Purpose |
 | --- | --- |
-| [Architecture](docs/architecture.md) | Data flow, invariants and component overview |
-| [Demo walkthrough](docs/demo-walkthrough.md) | Guided 3–10 minute demonstration |
-| [Live fixture pipeline](docs/live-fixture-pipeline.md) | Optional local kind lab and read-only capture |
-| [Safety model](docs/safety-model.md) | Safety boundaries, guards and governance rules |
+| [Architecture](docs/architecture.md) | Data flow, components and invariants |
+| [Safety model](docs/safety-model.md) | Read-only boundaries, refusals and governance |
+| [Demo walkthrough](docs/demo-walkthrough.md) | How to present KubeTriage in 3–10 minutes |
+| [Live fixture pipeline](docs/live-fixture-pipeline.md) | Optional local kind capture workflow |
 
 ---
 
-**KubeTriage does not try to make Kubernetes autonomous. It tries to make diagnosis reproducible, bounded, and difficult to fake.**
+## In one sentence
+
+> KubeTriage is a read-only Kubernetes incident investigator that works from
+> frozen evidence, produces the same diagnosis every time, and can show exactly
+> where every conclusion came from.

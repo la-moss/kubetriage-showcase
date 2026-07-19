@@ -1,0 +1,33 @@
+{
+  "_public_note": "Compact sanitised summary of the frozen A5A adversarial admission corpus. Does not include internal fixtures or attack payloads.",
+  "contract_version": "kubetriage_adversarial_result/v1",
+  "corpus_id": "kubetriage-a5a-admission",
+  "corpus_version": 1,
+  "corpus_digest": "60504978eaa046f9fe04b4c532ebf4c6039c74e2e42caa727312f384e370bb52",
+  "total_cases": 102,
+  "passed": 102,
+  "positive_controls": 11,
+  "positive_controls_passed": 11,
+  "negative_cases": 90,
+  "negative_cases_rejected": 90,
+  "unexpected_admissions": 0,
+  "capability_leaks": 0,
+  "renderer_leaks": 0,
+  "semantic_rule_match_rate": 1.0,
+  "coherent_rebind_coverage_note": "38 coherent-rebind cases exercise fully resealed compound attacks so rejection cannot be blamed on a stale outer digest alone.",
+  "family_counts": {
+    "artifact_body": 8,
+    "authority_forgery": 9,
+    "claim_selection": 10,
+    "coherent_multi_step": 6,
+    "contribution": 12,
+    "cross_run": 5,
+    "drift": 6,
+    "fact": 12,
+    "manifest_binding": 7,
+    "pointer": 7,
+    "positive_control": 11,
+    "support_set": 8,
+    "terminal_control": 1
+  }
+}

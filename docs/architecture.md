@@ -1,19 +1,63 @@
-# KubeClaw Architecture
+# KubeTriage Architecture
 
 ## Overview
 
-KubeClaw diagnoses Kubernetes incidents from **frozen replay evidence** — pre-recorded outputs from a strict six-tool allowlist. The engine is fully deterministic: no LLM calls, no randomness, no live cluster access during diagnosis, and no write operations.
+KubeTriage diagnoses Kubernetes incidents from **frozen replay evidence** — pre-recorded outputs from a strict six-tool allowlist. The engine is fully deterministic: no LLM calls, no randomness, no live cluster access during diagnosis, and no write operations.
 
-The repository documents a target contract boundary for a possible future AI
-explanation layer. A strict `agent_safe_response/v1` envelope exists and
-deterministic OpenClaw output is mapped and validated against it, but
-real-agent admission is currently blocked because stable citations, output
-policy enforcement, and adversarial evaluation are not complete. No real
-autonomous AI agent currently exists.
+Deterministic diagnosis is the authority. Provenance and policy enforcement sit on top of that authority. Offline OpenClaw and LLM packages are scaffolds only. No provider boundary is admitted. Real-agent admission remains blocked even though A4A, A4B, A5A, and A5B have passed independent review and the A5 programme is complete.
 
-![KubeClaw end-to-end architecture](../images/kubeclaw-diagram.png)
+![KubeTriage end-to-end architecture](../images/kubetriage-diagram.png)
 
-## Data flow
+## Current admitted chain
+
+```text
+frozen read-only evidence
+  → canonical redacted evidence artifacts
+  → typed facts with exact citations
+  → deterministic classification
+  → hypothesis ranking
+  → confidence decomposition
+  → immutable run manifest
+  → claim / fact / evidence provenance
+  → contribution replay
+  → identity-bound support sets
+  → provenance-aware policy v3
+  → immutable validated capability
+  → deterministic renderer
+```
+
+## Layer separation
+
+```text
+┌────────────────────────────────────────────────────────────┐
+│  Deterministic engine (diagnostic authority)               │
+│  safety / validation / redaction → state machine → report  │
+│  no LLM · no remediation · replay-first                    │
+└────────────────────────────┬───────────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────────┐
+│  Provenance / admission enforcement                        │
+│  run manifest · fact provenance · contribution replay      │
+│  support-set identity · agent_output_policy/v3             │
+│  capability mint · deterministic renderer                  │
+└────────────────────────────┬───────────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────────┐
+│  Offline OpenClaw / LLM scaffolds (not admitted agent)     │
+│  agent_safe_response/v1 mapping · constrained v2 demo      │
+│  offline LLM adapter string/value checks — no provider     │
+└────────────────────────────┬───────────────────────────────┘
+                             │
+                             ▼
+┌────────────────────────────────────────────────────────────┐
+│  Future provider boundary — NOT PRESENT                    │
+│  real-agent admission blocked by operational/human gates   │
+└────────────────────────────────────────────────────────────┘
+```
+
+## Deterministic engine data flow
 
 ```
 Replay Evidence (frozen tool outputs)
@@ -21,7 +65,6 @@ Replay Evidence (frozen tool outputs)
         ▼
 ┌─────────────────────────────────────────────────────┐
 │  Safety / Validation / Redaction                     │
-│                                                      │
 │  Context guard, namespace guard                      │
 │  Tool spoofing, homoglyph, injection detection       │
 │  Secret data, JWT, PEM redaction                     │
@@ -31,98 +74,39 @@ Replay Evidence (frozen tool outputs)
                        ▼
 ┌─────────────────────────────────────────────────────┐
 │  Deterministic State Machine                         │
-│                                                      │
-│  SIGNAL_INGESTION                                    │
-│       ↓                                              │
-│  FACT_EXTRACTION                                     │
-│       ↓                                              │
-│  CLASSIFICATION                                      │
-│       ↓                                              │
-│  HYPOTHESIS_RANKING                                  │
-│       ↓                                              │
-│  CONFIDENCE_SCORING                                  │
-│       ↓                                              │
-│  STOP_OR_NEXT                                        │
-│       ├── FINAL_REPORT (no drift evidence)           │
-│       └── DRIFT_RECHECK → re-enter FACT_EXTRACTION   │
-│              (at most once per run)                   │
+│  SIGNAL_INGESTION → FACT_EXTRACTION → CLASSIFICATION │
+│  → HYPOTHESIS_RANKING → CONFIDENCE_SCORING           │
+│  → STOP_OR_NEXT                                      │
+│       ├── FINAL_REPORT                               │
+│       └── DRIFT_RECHECK (at most once) → re-enter    │
 └──────────────────────┬──────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│  Output                                              │
-│                                                      │
 │  Diagnostic report (JSON + Markdown)                 │
-│  Or: Refusal object (terminal, no diagnosis)         │
+│  or terminal Refusal                                 │
 └─────────────────────────────────────────────────────┘
-
-                  ┌──────────────────────────┐
-                  │  OpenClaw Contract Layer │
-                  │                          │
-                  │  Request validation +    │
-                  │  agent_safe_response/v1  │
-                  │  mapped & validated      │
-                  │  output envelope         │
-                  └──────────────────────────┘
-                         │
-              Future constrained consumers
-              may use this boundary only
-              after admission hardening.
 ```
-
-## Optional layers
-
-Beyond the core engine, two offline prototype layers demonstrate parts of a
-possible AI integration boundary:
-
-```
-KubeClaw engine (deterministic diagnosis)
-        │
-        ▼
-OpenClaw agent consumer (deterministic explainer + policy guard)
-        │
-        ▼
-LLM adapter (offline prompt builder + candidate policy validation)
-        │
-        ▼
-[future] LLM provider — explanation only, never diagnosis
-```
-
-The agent consumer and LLM adapter are **not** part of the engine. They do not
-call kubectl or a real LLM and do not remediate. Their current string/value
-checks are policy scaffolds, not sufficient real-agent gates.
 
 ## Key invariants
 
-- **Replay evidence is the source of truth.** All diagnosis runs against frozen tool outputs. The engine does not call kubectl or access live clusters during replay.
-
-- **Live Kubernetes is optional and local-only.** A dedicated kind lab can capture read-only evidence into generated replay sessions. Capture is not diagnosis. Generated sessions are unreviewed until promoted through corpus governance.
-
-- **OpenClaw is a contract scaffold.** Request validation enforces the tool
-  allowlist, blocks write verbs, validates request payloads, and rejects unknown
-  tools or fields. Deterministic OpenClaw output can be mapped into the closed
-  `agent_safe_response/v1` envelope and validated against it before being
-  exposed; malformed envelopes fail closed. Semantic-policy, stable-citation,
-  and adversarial-evaluation hardening remain required, and real-agent
-  admission remains blocked.
-
-- **Agent evaluation is separate from engine evaluation.** Engine evaluation measures classification accuracy, confidence calibration, and replay correctness. Agent evaluation measures whether an external agent preserves diagnoses, respects refusals, avoids invented facts, and avoids unsafe remediation.
-
-- **Drift is bounded.** At most one drift recheck per session. Drift performs full recomputation from merged evidence — it never patches the previous answer. Post-drift confidence must not exceed pre-drift confidence.
+- **Replay evidence is the source of truth.** Diagnosis runs against frozen tool outputs. The engine does not call kubectl during replay.
+- **Live Kubernetes is optional and local-only.** A dedicated kind lab can capture read-only evidence into generated sessions. Capture is not diagnosis. Generated sessions are unreviewed until promoted.
+- **OpenClaw is a contract / consumer scaffold.** It is not the currently admitted real-agent path. The LLM adapter is offline-only and does not call a provider.
+- **A2 envelope vs A4B v3 path.** `agent_safe_response/v1` is an earlier authority-envelope milestone. Provenance-aware `agent_explanation/v3` under `agent_output_policy/v3` is the later admitted explanation path for provenance-bound rendering.
+- **Drift is bounded.** At most one drift recheck per session, always full recomputation. Post-drift confidence must not exceed pre-drift confidence.
+- **A5 is complete as an evaluation programme.** Adversarial and metamorphic suites passed independent review. That does not admit a real agent.
 
 ## Evaluation corpora
 
 | Corpus | Sessions | Purpose |
 | --- | --- | --- |
 | Golden | 20 | Development regression; CI replay |
-| Holdout | 24 | Evaluation-only; engine behaviour must not be tuned against holdout results |
-| Generated | — | Unreviewed live-capture fixtures; not evaluation material until reviewed and promoted |
+| Holdout | 24 | Evaluation-only; never tuned against |
+| Generated | — | Unreviewed live-capture fixtures; not evaluation material until promoted |
 
-The governed replay corpus totals 44 sessions. Session types covered include
-crashloop, imagepull, oom, pending, service_unreachable, probe_failure,
-config_dependency_failure, insufficient evidence, refusal, tool failure, and
-drift.
+Session types include crashloop, imagepull, oom, pending, service_unreachable, probe_failure, config_dependency_failure, insufficient evidence, refusal, tool failure, and drift.
 
 ## What is not in this showcase
 
-This repository documents architecture, safety, and sample outputs only. It does not include the implementation source, test suite, calibration artifacts, or governed replay corpora. Those remain in the private implementation repository.
+This repository documents architecture, safety, evaluation summaries, and sample outputs only. It does not include the implementation source, test suite, calibration artifacts, private adversarial fixtures, or governed replay corpora. Those remain in the private implementation repository.

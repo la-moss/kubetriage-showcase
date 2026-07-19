@@ -1,0 +1,113 @@
+{
+  "_public_note": "Compact sanitised summary of the frozen A5B metamorphic suite v2. Does not include internal property fixtures or evidence bodies.",
+  "contract_version": "kubetriage_metamorphic_result/v1",
+  "suite_id": "kubetriage-a5b-metamorphic",
+  "suite_version": 2,
+  "suite_digest": "b367b02266444c0b680b28fb97ae60c197e4e00c2673aac3285fb82fcaebd124",
+  "total_properties": 67,
+  "passed_properties": 67,
+  "family_coverage": {
+    "canonicalisation": {
+      "passed": 3,
+      "total": 3
+    },
+    "capability_renderer": {
+      "passed": 3,
+      "total": 3
+    },
+    "composition": {
+      "passed": 5,
+      "total": 5
+    },
+    "conflict": {
+      "passed": 1,
+      "total": 1
+    },
+    "drift": {
+      "passed": 5,
+      "total": 5
+    },
+    "duplicate_evidence": {
+      "passed": 8,
+      "total": 8
+    },
+    "evidence_removal": {
+      "passed": 10,
+      "total": 10
+    },
+    "identity_sensitivity": {
+      "passed": 3,
+      "total": 3
+    },
+    "insufficient_evidence": {
+      "passed": 2,
+      "total": 2
+    },
+    "irrelevant_noise": {
+      "passed": 8,
+      "total": 8
+    },
+    "operational_metadata": {
+      "passed": 4,
+      "total": 4
+    },
+    "ordering": {
+      "passed": 4,
+      "total": 4
+    },
+    "python_parity": {
+      "passed": 1,
+      "total": 1
+    },
+    "refusal": {
+      "passed": 3,
+      "total": 3
+    },
+    "repeat_determinism": {
+      "passed": 4,
+      "total": 4
+    },
+    "strengthening": {
+      "passed": 1,
+      "total": 1
+    },
+    "truncation": {
+      "passed": 2,
+      "total": 2
+    }
+  },
+  "duplicate_evidence_result": {
+    "passed": 8,
+    "total": 8
+  },
+  "irrelevant_noise_result": {
+    "passed": 8,
+    "total": 8
+  },
+  "evidence_removal_result": {
+    "passed": 10,
+    "total": 10
+  },
+  "repeat_determinism_result": {
+    "passed": 4,
+    "total": 4
+  },
+  "capability_leaks": 0,
+  "renderer_leaks": 0,
+  "nondeterministic_repeats": 0,
+  "confidence_removal_distinction": {
+    "pure_support_removal": "confidence must not increase when only winning-class supporting evidence is removed",
+    "mixed_information_removal": "arbitrary mixed-information removal has no universal confidence direction; mixed cases are checked through exact confidence decomposition",
+    "relation_counts": {
+      "drift_relation": 4,
+      "exact_invariance": 27,
+      "fail_closed": 4,
+      "mixed_information_relation": 1,
+      "monotonic_non_decrease": 1,
+      "monotonic_non_increase": 12,
+      "pure_support_removal": 7,
+      "required_change": 4,
+      "terminal_invariance": 7
+    }
+  }
+}

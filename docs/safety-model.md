@@ -1,10 +1,14 @@
-# KubeClaw Safety Model
+# KubeTriage Safety Model
 
-KubeClaw's deterministic engine and runner safety are enforced in code, not
-prompts. Future agent-output enforcement is not yet complete: real-agent
-admission is currently blocked, and no real autonomous agent exists. This
-document describes enforced boundaries and documented targets; it does not
-claim that safety bypass by a future agent is already impossible.
+KubeTriage's deterministic engine and runner safety are enforced in code, not
+prompts. A4A/A4B provenance binding and A5A/A5B adversarial evaluation have
+passed independent review, and the A5 programme is complete, but **real-agent
+admission remains blocked**. No real autonomous agent, provider integration,
+remediation path, or cluster mutation capability exists.
+
+This document describes enforced boundaries and remaining operational/human
+gates. It does not claim that every future agent-output bypass is already
+impossible in a production deployment.
 
 ## Read-only evidence capture
 
@@ -27,7 +31,7 @@ The allowlist is asserted in code. Unknown tools, spoofed tool names, and homogl
 
 ## Context guard
 
-KubeClaw targets a dedicated lab cluster context (`kind-kubeclaw`) by default. Requests against other cluster contexts are refused unless an explicit unsafe override is provided. KubeClaw will not silently target production or arbitrary clusters.
+KubeTriage targets a dedicated lab cluster context (`kind-kubetriage`) by default. Requests against other cluster contexts are refused unless an explicit unsafe override is provided. KubeTriage will not silently target production or arbitrary clusters.
 
 ## Namespace guard
 
@@ -39,7 +43,7 @@ Evidence and session output paths are validated. Writes to governed corpus direc
 
 ## Refusal as terminal state
 
-When KubeClaw refuses a request — due to context guard, namespace guard, blocked verbs, validation failure, or other safety checks — the refusal is **terminal**:
+When KubeTriage refuses a request — due to context guard, namespace guard, blocked verbs, validation failure, or other safety checks — the refusal is **terminal**:
 
 - No diagnostic loop continues
 - No diagnosis is produced
@@ -54,7 +58,7 @@ All engine correctness is evaluated against deterministic replay of frozen evide
 
 ## No remediation
 
-KubeClaw produces diagnostic reports and refusals. It does not:
+KubeTriage produces diagnostic reports and refusals. It does not:
 
 - Apply, patch, delete, or scale resources
 - Execute commands inside containers
@@ -65,15 +69,26 @@ Write and mutation verbs are blocked unconditionally.
 
 ## No live production cluster support
 
-KubeClaw does not target production clusters. The optional kind lab is local-only. There is no live production diagnosis mode.
+KubeTriage does not target production clusters. The optional kind lab is local-only. There is no live production diagnosis mode.
 
 ## No LLM inside the engine
 
 The diagnostic engine contains no LLM calls, no model inference, and no randomness. Classification, confidence scoring, and report generation are deterministic code.
 
-Future LLM layers, if admitted after hardening and human approval, must sit
-**outside** the engine. The target boundary permits explanation but prohibits
-diagnosis, remediation, and engine-result override.
+Future LLM layers, if ever admitted after operational isolation review and human
+approval, must sit **outside** the engine. The target boundary permits
+explanation but prohibits diagnosis, remediation, and engine-result override.
+The offline LLM adapter scaffold is **not** an admitted path.
+
+## Provenance-aware admission
+
+The current provenance-aware explanation path verifies claim → fact → evidence
+binding, contribution replay, and support-set identity before minting an
+immutable capability for the deterministic renderer. Failures fail closed; there
+is no silent fallback to a weaker policy.
+
+Governed adversarial (A5A) and metamorphic (A5B) evaluation exercises that
+boundary. Passing those suites does not equal real-agent admission.
 
 ## Generated sessions are unreviewed until promoted
 
@@ -95,18 +110,18 @@ Non-drift and drift metrics are reported separately and never merged as a single
 
 ## Agent and LLM safety boundaries
 
-Any future agent admitted to consume KubeClaw output must:
+Any future agent admitted to consume KubeTriage output must:
 
-- Preserve the KubeClaw diagnosis exactly (no class override, no confidence inflation)
+- Preserve the KubeTriage diagnosis exactly (no class override, no confidence inflation)
 - Respect refusals as terminal
 - Avoid inventing evidence not present in the engine result
 - Avoid remediation language and kubectl mutation commands
 - Include a safety boundary attestation in every explanation
 
-## Agent-safe response envelope
+## Agent-safe response envelope (A2 milestone)
 
-A strict, closed contract — `agent_safe_response/v1` — defines the only shape
-of KubeClaw output a future agent would be allowed to consume:
+A strict, closed contract — `agent_safe_response/v1` — defines an earlier
+authority-envelope shape:
 
 - Exactly one mutually exclusive outcome per response: `diagnosis`,
   `insufficient_evidence`, or `refusal`.
@@ -115,14 +130,11 @@ of KubeClaw output a future agent would be allowed to consume:
 - The AI may explain but not override: the envelope is an immutable authority
   record, and agent prose would live structurally outside it.
 
-Deterministic OpenClaw output is mapped into this envelope and validated
-against the contract before being exposed; malformed envelopes fail closed.
-This validation currently applies to deterministic OpenClaw-facing output
-only — it is a prerequisite for real-agent admission, not real-agent admission
-itself. Real-agent admission remains blocked.
+Deterministic OpenClaw output can be mapped into this envelope and validated
+before exposure. Envelope-local evidence IDs such as `ev-001` are **not** the
+current A4B stable fact-identity model.
 
-The current private implementation additionally contains deterministic
-string/value policy scaffolds for selected cases. They do not yet enforce
-semantic evidence provenance or the complete response boundary and are not
-sufficient real-agent gates. Policy hardening, stable citation/provenance
-hardening, and adversarial evaluation remain future gates.
+Later **A4B v3** provenance-aware admission (`agent_explanation/v3` under
+`agent_output_policy/v3`) supersedes this envelope for the admitted
+provenance-bound explanation path. Real-agent admission remains blocked by
+operational and human gates even after A5 programme completion.

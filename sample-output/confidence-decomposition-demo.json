@@ -1,0 +1,68 @@
+{
+  "_public_note": "Reviewed FINDING-A5B-1 example. This is MIXED_INFORMATION_REMOVAL, not a claim that less evidence normally increases confidence. Removing describe_pod also removed the sole weak support fact, clearing mixed_evidence_dampening (0.16 \u2192 0.0) and moving base_tier from mixed_strong_weak to strong_only. Pure-support removal is evaluated separately and must not increase confidence. No raw evidence bodies included.",
+  "relation": "mixed_information_relation",
+  "control_session": "golden-probe-readiness-failure",
+  "transformation": {
+    "op": "remove_supporting_evidence",
+    "mode": "tool_name",
+    "tool": "describe_pod"
+  },
+  "control": {
+    "outcome": "diagnosis",
+    "top_class": "probe_failure",
+    "confidence": 0.72,
+    "decomposition": {
+      "outcome": "diagnosis",
+      "winning_class": "probe_failure",
+      "base_tier": "mixed_strong_weak",
+      "base_score": 0.72,
+      "has_strong_support": true,
+      "has_weak_support": true,
+      "strong_support_count": 4,
+      "weak_support_count": 1,
+      "total_positive_support": 9,
+      "mixed_evidence_dampening": 0.16,
+      "contradiction_penalty": 0.0,
+      "tool_failure_penalty": 0.0,
+      "stale_evidence_penalty": 0.0,
+      "confidence_before_bounds": 0.72,
+      "final_confidence": 0.72
+    },
+    "decomposition_digest": "9591be6c563b944e951548bec962a295e36b084e93d78196ba9ebcd385ea08cc",
+    "matches_engine": true
+  },
+  "transformed": {
+    "outcome": "diagnosis",
+    "top_class": "probe_failure",
+    "confidence": 0.88,
+    "decomposition": {
+      "outcome": "diagnosis",
+      "winning_class": "probe_failure",
+      "base_tier": "strong_only",
+      "base_score": 0.88,
+      "has_strong_support": true,
+      "has_weak_support": false,
+      "strong_support_count": 2,
+      "weak_support_count": 0,
+      "total_positive_support": 4,
+      "mixed_evidence_dampening": 0.0,
+      "contradiction_penalty": 0.0,
+      "tool_failure_penalty": 0.0,
+      "stale_evidence_penalty": 0.0,
+      "confidence_before_bounds": 0.88,
+      "final_confidence": 0.88
+    },
+    "decomposition_digest": "178f0be3e601c506922bed3f52c5cb8a6bdc2bcc03db7a459b877de667ba662c",
+    "matches_engine": true
+  },
+  "component_delta_explaining_rise": {
+    "mixed_evidence_dampening_control": 0.16,
+    "mixed_evidence_dampening_transformed": 0.0,
+    "confidence_delta": 0.16,
+    "explanation": "Confidence rose by exactly the removed mixed-evidence dampening (0.16). This is an evidence-quality tier change, not amplification from less total evidence."
+  },
+  "invariant_distinction": {
+    "pure_support_removal": "confidence must not increase",
+    "mixed_information_removal": "no universal confidence direction; exact confidence decomposition must explain the observed change"
+  }
+}

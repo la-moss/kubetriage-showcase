@@ -1,82 +1,23 @@
 ============================================================
-  LLM Adapter — Prompt Preview
+  LEGACY / OFFLINE SCAFFOLD — LLM Adapter Policy Demo
 ============================================================
 
-  No real LLM was called. This is an offline prompt preview.
+  LABEL: offline legacy scaffold demonstration
+  - No real LLM was called
+  - No provider SDK was imported
+  - Not the admitted agent_explanation/v3 path
+  - Not evidence of real-agent readiness
 
-# KubeClaw LLM Explanation Prompt Template
-
-You are an explanation assistant. You are **not** the diagnostic authority.
-**KubeClaw is the diagnostic authority.**
-
-You will receive a KubeClaw diagnostic result as JSON. Your job is to produce
-a clear, accurate, human-readable explanation of that result. You must follow
-every rule below exactly.
-
----
-
-## Rules (excerpt)
-
-1. **Preserve top_class exactly.** Do not reclassify, soften, or strengthen the diagnosis.
-2. **Preserve confidence exactly.** Do not round up, inflate, or editorialize.
-3. **Preserve refusal exactly.** Refusal is terminal. Do not continue diagnosing.
-4. **Preserve drift_delta exactly.** Report before/after classes, confidences, and change flag.
-5. **Do not invent evidence.** Only cite facts present in the KubeClaw result.
-6. **Do not recommend executable remediation.** No kubectl mutation commands
-   (apply, patch, delete, exec, scale, rollout restart, drain, cordon, etc.).
-7. **Safe next steps must be phrased as human inspection, not execution.**
-
----
-
-## Input (drift session excerpt)
-
-```json
-{
-  "session_id": "drift-flip-01",
-  "corpus": "holdout",
-  "top_class": "imagepull",
-  "confidence": 0.76,
-  "drift_triggered": true,
-  "drift_delta": {
-    "top1_before": "crashloop",
-    "confidence_before": 0.88,
-    "top1_after": "imagepull",
-    "confidence_after": 0.76,
-    "changed": true,
-    "reasons": [
-      "confidence decreased after drift recomputation",
-      "post-drift evidence introduced contradiction",
-      "top class changed from crashloop to imagepull"
-    ]
-  },
-  "refused": false,
-  "insufficient_evidence": false
-}
-```
-
----
-
-## Safety boundary (required in every candidate response)
-
-- I did not call kubectl
-- I did not modify the cluster
-- I did not override KubeClaw's diagnosis
-- I did not invent evidence
-- I did not execute remediation
-
-============================================================
-  LLM Adapter — Unsafe Candidate Rejected
-============================================================
-
-  No real LLM was called. Policy validation runs offline on test candidates.
+  Scenario: drift-flip-01 candidate containing remediation language
+  Result: FAIL — policy checks rejected the candidate
 
 FAIL — candidate explanation failed policy checks:
   - remediation language: 'kubectl apply'
   - remediation language: 'kubectl delete'
-  - remediation language: 'scale deployment'
   - remediation language: 'delete pod'
-  - imperative remediation phrasing detected
+  - remediation language: 'scale deployment'
+  - remediation language: 'redeploy'
+  - Imperative remediation phrasing detected.
 
-The unsafe candidate suggested automated cluster mutation. KubeClaw policy
-rejects any explanation that recommends kubectl remediation commands or
-imperative fix actions. Only read-only human inspection steps are permitted.
+  KubeTriage remains the diagnostic authority. This scaffold only shows that
+  selected string/value checks can reject obvious remediation prose offline.

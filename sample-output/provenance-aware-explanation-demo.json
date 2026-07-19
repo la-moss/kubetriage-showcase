@@ -1,0 +1,115 @@
+{
+  "_public_note": "Faithful excerpt from a real accepted agent_explanation/v3 admission on frozen session golden-imagepull-backoff under agent_output_policy/v3. Not a simplified production schema. Digests and IDs are real; nested lists are truncated for readability. No raw evidence bodies included.",
+  "session_id": "golden-imagepull-backoff",
+  "admission": {
+    "accepted": true,
+    "policy": "agent_output_policy/v3",
+    "candidate_schema": "agent_explanation/v3",
+    "capability_minted": true,
+    "violations": []
+  },
+  "sealed_outcome": {
+    "outcome_type": "diagnosis",
+    "top_class": "imagepull",
+    "confidence": 0.88
+  },
+  "authority_binding": {
+    "authority_digest": "61bae8d1c0f308ca2e2146db9a097b431d0726bfc987305266e4449eb39acfdc",
+    "session_id": "golden-imagepull-backoff",
+    "run_manifest_digest": "e95c42f5ed7387d40df5a4ade611103a8ffcb92d1195748e0c17820421f9a770",
+    "provenance_bundle_digest": "c12a8110a3962032312e2357a42d254804193f9df93ca18b11420dcee37d4e6d"
+  },
+  "claims": [
+    {
+      "claim_id": "claim-diagnosis",
+      "claim_type": "diagnosis_restatement",
+      "top_class": "imagepull",
+      "confidence": 0.88,
+      "support_set_id": "support-set-class-9fa72bb007fac7493fe2e04a"
+    },
+    {
+      "claim_id": "claim-confidence",
+      "claim_type": "confidence_restatement",
+      "confidence": 0.88
+    },
+    {
+      "claim_id": "claim-hypothesis-1",
+      "claim_type": "hypothesis_restatement",
+      "confidence": 0.88,
+      "support_set_id": "support-set-hypothesis-debbe6a1afec6d5e509fbcd6",
+      "incident_class": "imagepull",
+      "hypothesis_rank": 1
+    },
+    {
+      "claim_id": "claim-evidence",
+      "claim_type": "evidence_restatement",
+      "support_set_id": "support-set-class-9fa72bb007fac7493fe2e04a"
+    },
+    {
+      "claim_id": "claim-drift",
+      "claim_type": "drift_restatement"
+    },
+    {
+      "claim_id": "claim-safety-readonly",
+      "claim_type": "safety_boundary"
+    },
+    {
+      "claim_id": "claim-safety-noremediation",
+      "claim_type": "safety_boundary"
+    },
+    {
+      "claim_id": "claim-safety-human",
+      "claim_type": "safety_boundary"
+    }
+  ],
+  "fact_ids_sample": [
+    {
+      "fact_id": null,
+      "kind": null,
+      "subject": "events_tail",
+      "strength": null,
+      "supported": true,
+      "citations": [
+        {
+          "artifact_id": "evidence:sha256:e8ceb7f05a3f026088c528991b82bf10662f03cea053bd4959171053745c19b8",
+          "pointer_type": "byte_range",
+          "phase": "non_drift"
+        }
+      ]
+    },
+    {
+      "fact_id": null,
+      "kind": null,
+      "subject": "events_tail",
+      "strength": null,
+      "supported": true,
+      "citations": [
+        {
+          "artifact_id": "evidence:sha256:e8ceb7f05a3f026088c528991b82bf10662f03cea053bd4959171053745c19b8",
+          "pointer_type": "byte_range",
+          "phase": "non_drift"
+        }
+      ]
+    }
+  ],
+  "contribution_ids_sample": [
+    "contribution:sha256:77afadf069c22234fd3ab422",
+    "contribution:sha256:78db0d92eae961596153b950",
+    "contribution:sha256:1ea7962611ff3315faf5396f",
+    "contribution:sha256:2a94ba498816d7d3dd1558fc",
+    "contribution:sha256:ce59a7c2aca77dee80b0cc91",
+    "contribution:sha256:01342773bbc0638d8dcc5440",
+    "contribution:sha256:7020e102384c5b175f55787d"
+  ],
+  "support_set_ids_sample": [
+    "support-set-class-9fa72bb007fac7493fe2e04a",
+    "support-set-hypothesis-debbe6a1afec6d5e509fbcd6"
+  ],
+  "provenance_bundle_digest": "c12a8110a3962032312e2357a42d254804193f9df93ca18b11420dcee37d4e6d",
+  "run_manifest_digest": "e95c42f5ed7387d40df5a4ade611103a8ffcb92d1195748e0c17820421f9a770",
+  "renderer": {
+    "accepted": true,
+    "rendered_digest": "f599f4f86433266b486f4409090b4c9fe09982b1cb760f9efe75e644b035a7df",
+    "rendered_text": "KubeTriage classified this incident as `imagepull` with confidence 0.88.\nProvenance:\n  support_set_id: support-set-class-9fa72bb007fac7493fe2e04a\n  fact_ref: fact:sha256:6e24a413196b1d5b1c9cc2fac012f3e6fdcbd320552cf1b9b0842204571a39e7\n  fact_ref: fact:sha256:cedb12abb4c88785135551ce9f2116820c438e171b367e4ad64dafcf1355342b\n\nReported confidence is 0.88.\n\nHypothesis rank 1: `imagepull` (confidence 0.88).\nProvenance:\n  support_set_id: support-set-hypothesis-debbe6a1afec6d5e509fbcd6\n  fact_ref: fact:sha256:6e24a413196b1d5b1c9cc2fac012f3e6fdcbd320552cf1b9b0842204571a39e7\n  fact_ref: fact:sha256:cedb12abb4c88785135551ce9f2116820c438e171b367e4ad64dafcf1355342b\n\nSupporting evidence:\n- [ev-001] descriptor_version=kubetriage_source_descriptor/v1;tool=events_tail;namespace=default\nProvenance:\n  support_set_id: support-set-class-9fa72bb007fac7493fe2e04a\n  fact_ref: fact:sha256:6e24a413196b1d5b1c9cc2fac012f3e6fdcbd320552cf1b9b0842204571a39e7\n  fact_ref: fact:sha256:cedb12abb4c88785135551ce9f2116820c438e171b367e4ad64dafcf1355342b\n\nDrift recomputation was not triggered.\n\nThis explanation is read-only.\n\nNo remediation was performed.\n\nA human operator decides what happens next."
+  }
+}

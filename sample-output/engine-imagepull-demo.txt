@@ -1,5 +1,5 @@
 ============================================================
-  KubeClaw Diagnosis
+  KubeTriage Diagnosis
 ============================================================
 
   session_id:          golden-imagepull-backoff
@@ -18,3 +18,4 @@
     ✓ read-only — no write operations executed
     ✓ no remediation executed
     ✓ six-tool allowlist preserved
+

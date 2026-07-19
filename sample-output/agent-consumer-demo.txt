@@ -1,25 +1,29 @@
+# LEGACY / EARLIER PATH NOTE
+# Offline A3C constrained explanation under agent_output_policy/v2.
+# Not the A4B provenance-aware agent_explanation/v3 admission path.
+# Not real-agent admission. No LLM. No remediation.
+#
 ============================================================
-  OpenClaw Agent Summary
+  KubeTriage Constrained Explanation (admitted A3C path)
 ============================================================
 
-  KubeClaw diagnosis: imagepull
-  Confidence: 0.88
+KubeTriage classified this incident as `imagepull` with confidence 0.88.
 
-  What KubeClaw found:
-    KubeClaw diagnosed this incident as imagepull with confidence 0.88. Container image cannot be pulled from the registry.
+Reported confidence is 0.88.
 
-  Top hypotheses:
-    - imagepull: confidence=0.880
+Hypothesis rank 1: `imagepull` (confidence 0.88).
 
-  What would change the diagnosis:
-    Image pull succeeds and pod reaches Running without ImagePullBackOff.
+Supporting evidence:
+- [ev-001] imagepull:errimagepull:events_tail
+- [ev-002] imagepull:imagepullbackoff:events_tail
 
-  Safe human next step:
-    A human could inspect the image reference and registry access. A human could review pod events for image pull failures.
+Drift recomputation was not triggered.
 
-  Safety boundary:
-    - I did not call kubectl
-    - I did not modify the cluster
-    - I did not override KubeClaw's diagnosis
-    - I did not invent evidence
-    - I did not execute remediation
+This explanation is read-only.
+
+No remediation was performed.
+
+A human operator decides what happens next.
+
+  [policy=agent_output_policy/v2 renderer=agent_explanation_renderer/v1]
+

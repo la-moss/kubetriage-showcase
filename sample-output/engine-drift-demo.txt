@@ -1,5 +1,5 @@
 ============================================================
-  KubeClaw Drift Diagnosis
+  KubeTriage Drift Diagnosis
 ============================================================
 
   session_id:          drift-flip-01
@@ -28,3 +28,4 @@
     ✓ read-only — no write operations executed
     ✓ no remediation executed
     ✓ six-tool allowlist preserved
+

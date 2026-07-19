@@ -1,61 +1,62 @@
 {
-  "schema_version": "agent_safe_response/v1",
-  "producer": "kubeclaw",
-  "outcome_type": "diagnosis",
+  "_showcase_note": "A2 milestone: validated agent_safe_response/v1 authority envelope from frozen session golden-imagepull-backoff. Envelope-local evidence IDs (ev-001, \u2026) are NOT current A4B stable fact identity. Later A4B v3 provenance-aware admission supersedes this for the admitted provenance-bound explanation path. Not real-agent admission.",
   "diagnosis": {
-    "top_class": "imagepull",
     "confidence": 0.88,
-    "summary": "KubeClaw diagnosed imagepull with confidence 0.88 from deterministic replay evidence.",
     "hypotheses": [
       {
-        "rank": 1,
-        "incident_class": "imagepull",
         "confidence": 0.88,
+        "contradiction_evidence_ids": [],
+        "incident_class": "imagepull",
+        "rank": 1,
         "supporting_evidence_ids": [
           "ev-001",
           "ev-002"
-        ],
-        "contradiction_evidence_ids": []
+        ]
       }
-    ]
+    ],
+    "summary": "KubeTriage diagnosed imagepull with confidence 0.88 from deterministic replay evidence.",
+    "top_class": "imagepull"
   },
-  "insufficient_evidence": null,
-  "refusal": null,
   "drift": {
-    "triggered": false,
-    "delta": null
+    "delta": null,
+    "triggered": false
   },
   "evidence": [
     {
       "evidence_id": "ev-001",
-      "tool": "events_tail",
       "source": "report_json.hypotheses[0].supporting_evidence[0]",
       "summary": "imagepull:errimagepull:events_tail",
-      "support": "supports"
+      "support": "supports",
+      "tool": "events_tail"
     },
     {
       "evidence_id": "ev-002",
-      "tool": "events_tail",
       "source": "report_json.hypotheses[0].supporting_evidence[1]",
       "summary": "imagepull:imagepullbackoff:events_tail",
-      "support": "supports"
+      "support": "supports",
+      "tool": "events_tail"
     }
   ],
-  "safety": {
-    "read_only": true,
-    "no_remediation": true,
-    "no_live_diagnosis": true,
-    "llm_in_engine": false,
-    "kubectl_mutation_allowed": false,
-    "human_approval_required_for_agent": true
-  },
+  "insufficient_evidence": null,
+  "outcome_type": "diagnosis",
+  "producer": "kubetriage",
   "provenance": {
-    "session_id": "golden-imagepull-backoff",
     "corpus": "golden",
-    "source": "golden/sessions/golden-imagepull-backoff",
-    "generated": false,
-    "reviewed_and_promoted": true,
     "evaluation_use_allowed": true,
-    "replay_source_of_truth": true
-  }
+    "generated": false,
+    "replay_source_of_truth": true,
+    "reviewed_and_promoted": true,
+    "session_id": "golden-imagepull-backoff",
+    "source": "golden/sessions/golden-imagepull-backoff"
+  },
+  "refusal": null,
+  "safety": {
+    "human_approval_required_for_agent": true,
+    "kubectl_mutation_allowed": false,
+    "llm_in_engine": false,
+    "no_live_diagnosis": true,
+    "no_remediation": true,
+    "read_only": true
+  },
+  "schema_version": "agent_safe_response/v1"
 }

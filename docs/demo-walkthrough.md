@@ -1,6 +1,6 @@
-# KubeClaw Demo Walkthrough
+# KubeTriage Demo Walkthrough
 
-This guide covers how to demonstrate KubeClaw in 3–10 minutes using the sample outputs in this showcase repository. The full implementation repository runs the same flows offline against frozen replay evidence — no live Kubernetes cluster is required for diagnosis or evaluation.
+This guide covers how to demonstrate KubeTriage in 3–10 minutes using the sample outputs in this showcase repository. The full implementation repository runs the same flows offline against frozen replay evidence — no live Kubernetes cluster is required for diagnosis or evaluation.
 
 ---
 
@@ -12,7 +12,7 @@ Each path demonstrates a different safety or diagnostic property. Representative
 
 **What to show:** [sample-output/engine-imagepull-demo.txt](../sample-output/engine-imagepull-demo.txt)
 
-KubeClaw classifies a frozen evidence bundle as `imagepull` with high confidence (0.88), ranks hypotheses, and suggests the next read-only diagnostic step. Same evidence always produces the same report.
+KubeTriage classifies a frozen evidence bundle as `imagepull` with high confidence (0.88), ranks hypotheses, and records the next read-only diagnostic observation. Same evidence always produces the same report.
 
 **Talking points:**
 - Deterministic — run twice, output is identical
@@ -23,7 +23,7 @@ KubeClaw classifies a frozen evidence bundle as `imagepull` with high confidence
 
 **What to show:** [sample-output/engine-drift-demo.txt](../sample-output/engine-drift-demo.txt)
 
-The hero scenario. Pre-drift evidence supports `crashloop` (confidence 0.88). Post-drift evidence adds image pull failure signals. KubeClaw recomputes from the full merged evidence and the top class changes to `imagepull` (confidence 0.76).
+The hero scenario. Pre-drift evidence supports `crashloop` (confidence 0.88). Post-drift evidence adds image pull failure signals. KubeTriage recomputes from the full merged evidence and the top class changes to `imagepull` (confidence 0.76).
 
 **Talking points:**
 - Full recomputation — never patches the previous answer
@@ -35,51 +35,50 @@ The hero scenario. Pre-drift evidence supports `crashloop` (confidence 0.88). Po
 
 **What to show:** [sample-output/engine-refusal-demo.txt](../sample-output/engine-refusal-demo.txt)
 
-KubeClaw refuses a request targeting a non-safe cluster context. Refusal is terminal — no diagnostic loop continues, no remediation is attempted.
+KubeTriage refuses a request targeting a non-safe cluster context. Refusal is terminal — no diagnostic loop continues, no remediation is attempted.
 
 **Talking points:**
 - Safety enforced in code, not prompts
 - Refusal is successful safety behaviour
-- Context guard requires the dedicated lab context unless an explicit unsafe override is provided
+- Context guard requires the dedicated lab context (`kind-kubetriage`) unless an explicit unsafe override is provided
 
 ---
 
-## Agent and LLM layers
+## Provenance and evaluation samples (after A4 / A5)
 
-### OpenClaw agent consumer
+### Provenance-aware accepted explanation (A4B v3)
+
+**What to show:** [sample-output/provenance-aware-explanation-demo.json](../sample-output/provenance-aware-explanation-demo.json)
+
+A real accepted `agent_explanation/v3` admission under `agent_output_policy/v3` for `golden-imagepull-backoff`, with sealed outcome, constrained claims, stable fact IDs, contribution and support-set references, provenance bundle binding, and renderer digest.
+
+### A5A / A5B summaries
+
+- [adversarial-evaluation-summary.json](../sample-output/adversarial-evaluation-summary.json) — 102/102, frozen digest, zero unexpected admissions
+- [metamorphic-evaluation-summary.json](../sample-output/metamorphic-evaluation-summary.json) — 67/67 suite v2, pure vs mixed removal distinction
+- [confidence-decomposition-demo.json](../sample-output/confidence-decomposition-demo.json) — reviewed mixed-information removal (0.72 → 0.88 via dampening clear)
+
+---
+
+## Earlier / legacy layers (clearly labelled)
+
+### A2 agent-safe response envelope
+
+**What to show:** [sample-output/agent-safe-response-demo.json](../sample-output/agent-safe-response-demo.json)
+
+Closed `agent_safe_response/v1` authority envelope. Valid earlier milestone. Local IDs such as `ev-001` are envelope-local and are **not** current A4B stable fact identity. A4B v3 provenance enforcement supersedes this for the admitted provenance-aware explanation path.
+
+### A3C constrained consumer (offline)
 
 **What to show:** [sample-output/agent-consumer-demo.txt](../sample-output/agent-consumer-demo.txt)
 
-A deterministic prototype that reads KubeClaw output and produces a bounded
-human-readable explanation. Every built-in explanation includes a safety
-boundary attestation:
+Offline constrained explanation under `agent_output_policy/v2`. Not the v3 provenance-aware path. Not real-agent admission.
 
-- I did not call kubectl
-- I did not modify the cluster
-- I did not override KubeClaw's diagnosis
-- I did not invent evidence
-- I did not execute remediation
-
-KubeClaw remains the diagnostic authority. The target boundary permits
-explanation but prohibits override, invention, mutation, and remediation. The
-current scaffold does not fully enforce that boundary and is not sufficient for
-real-agent admission.
-
-Deterministic OpenClaw output can also be mapped into the strict
-`agent_safe_response/v1` envelope and validated against the closed contract
-before being exposed. The envelope carries exactly one outcome (`diagnosis`,
-`insufficient_evidence`, or `refusal`), required drift/evidence/safety/
-provenance sections, and no remediation or command fields. This is OpenClaw
-output validation, not real-agent admission — admission remains blocked.
-
-### LLM policy boundary
+### Legacy LLM policy scaffold
 
 **What to show:** [sample-output/llm-policy-demo.txt](../sample-output/llm-policy-demo.txt)
 
-An offline scaffold for a future LLM explanation layer. It builds prompts from
-KubeClaw results and applies deterministic string/value checks to candidate
-explanations. No real LLM is called. The checks reject selected known
-remediation patterns, but semantic policy hardening remains required.
+Offline prompt/policy scaffold. **No real LLM is called.** Not the admitted v3 path. Not evidence of real-agent readiness.
 
 ---
 
@@ -89,16 +88,18 @@ remediation patterns, but semantic policy hardening remains required.
 
 - **Deterministic.** The same evidence always produces the same diagnosis, confidence, hypothesis ranking, and report. No randomness, no wall-clock dependence, no hidden state.
 
-- **Read-only.** KubeClaw never executes write operations. All write and mutation verbs (`apply`, `patch`, `delete`, `exec`, `scale`, `rollout restart`, etc.) are blocked in code. The engine produces reports and refusals, never cluster changes.
+- **Read-only.** KubeTriage never executes write operations. All write and mutation verbs (`apply`, `patch`, `delete`, `exec`, `scale`, `rollout restart`, etc.) are blocked in code. The engine produces reports and refusals, never cluster changes.
 
-- **Replay-first.** Every test and evaluation runs against frozen evidence files. No live cluster is needed for the core demo. This makes the test suite fast, reproducible, and CI-friendly.
+- **Replay-first.** Every test and evaluation runs against frozen evidence files. No live cluster is needed for the core demo.
+
+- **A5 complete; admission blocked.** Adversarial and metamorphic evaluation passed independent review. Operational and human gates still block real-agent admission.
 
 ### Safety model
 
 See [safety-model.md](safety-model.md) for the full safety model. Key points:
 
 - Six-tool allowlist: `events_tail`, `describe_pod`, `describe_deploy`, `logs`, `get_yaml`, `top_pod`
-- Seven incident classes: `crashloop`, `imagepull`, `pending`, `service_unreachable`, `oom`, `probe_failure` (readiness/liveness grouped), `config_dependency_failure` (ConfigMap/Secret grouped)
+- Seven incident classes: `crashloop`, `imagepull`, `pending`, `service_unreachable`, `oom`, `probe_failure`, `config_dependency_failure`
 - Refusal is terminal — no diagnostic loop continues after refusal
 - Golden and holdout are governed corpora; generated sessions are unreviewed until promoted
 
@@ -106,7 +107,7 @@ See [safety-model.md](safety-model.md) for the full safety model. Key points:
 
 - **Golden corpus** (20 sessions) is used for development regression.
 - **Holdout corpus** (24 sessions) is evaluation-only. Engine behaviour must not be tuned against holdout results.
-- **44 governed sessions total**; latest replay state is golden 20/20 and holdout 24/24, with zero false-high-confidence results in calibration.
+- Latest replay state is golden 20/20 and holdout 24/24, with zero false-high-confidence results in calibration.
 - **Calibration** evaluates base (non-drift) and drift metrics separately — never mixed as a single headline metric.
 
 ---
@@ -115,18 +116,14 @@ See [safety-model.md](safety-model.md) for the full safety model. Key points:
 
 This is the strongest single-session demo. It shows diagnosis, drift, safety, and determinism in one pass.
 
-1. Pre-drift evidence contains strong crashloop signals. KubeClaw classifies as `crashloop` with confidence 0.88.
+1. Pre-drift evidence contains strong crashloop signals. KubeTriage classifies as `crashloop` with confidence 0.88.
 2. Post-drift evidence adds image pull failure signals. Crashloop signals remain but imagepull signals are now dominant.
-3. KubeClaw recomputes from the full merged evidence — fact extraction, classification, hypothesis ranking, confidence scoring.
+3. KubeTriage recomputes from the full merged evidence — fact extraction, classification, hypothesis ranking, confidence scoring.
 4. The top class changes deterministically from `crashloop` to `imagepull`. The `changed` flag is `true`.
 5. Confidence does not inflate. Post-drift confidence (0.76) is lower than pre-drift (0.88) because merged evidence contains contradictions.
-6. No remediation is executed. A human (or a future evaluated agent) decides what to do next.
+6. No remediation is executed. A human decides what to do next.
 
-No real autonomous AI agent currently exists. The strict
-`agent_safe_response/v1` envelope and OpenClaw output validation are in place,
-but real-agent admission is blocked until policy hardening (A3), stable
-citation/provenance hardening (A4), adversarial evaluation (A5),
-operational-isolation review, and human-approval gates are complete.
+No real autonomous AI agent currently exists. A4A/A4B/A5A/A5B have passed independent review and A5 is complete as an evaluation programme, but real-agent admission remains blocked by operational isolation review and human-approval gates.
 
 ---
 
@@ -145,11 +142,11 @@ Live capture is local-only, optional, and not required for the core demo. Replay
 
 ## Interview pitch
 
-> KubeClaw is not an AI that randomly runs kubectl. It is the deterministic, evaluated, safety-bounded diagnostic layer that an AI would need before it should be trusted near Kubernetes.
+> KubeTriage is not an AI that randomly runs kubectl. It is the deterministic, evaluated, safety-bounded diagnostic layer that an AI would need before it should be trusted near Kubernetes.
 
 ---
 
-## What KubeClaw does not do (demo talking points)
+## What KubeTriage does not do (demo talking points)
 
 | Claim | Reality |
 | --- | --- |
@@ -158,3 +155,4 @@ Live capture is local-only, optional, and not required for the core demo. Replay
 | "It fixes things" | No. Strictly read-only. All write verbs are refused. |
 | "It trains on data" | No. Evidence creates replay fixtures (after human review), not model updates. |
 | "It adapts automatically" | No. Engine changes only through deliberate, reviewed code changes. |
+| "A5 means a real agent is ready" | No. A5 is complete as evaluation; real-agent admission remains blocked. |
