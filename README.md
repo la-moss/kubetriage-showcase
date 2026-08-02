@@ -17,7 +17,7 @@ Think of it as an incident investigator working from a sealed evidence file:
 
 KubeTriage itself is not AI: KubeTriage is not an AI Kubernetes agent, and no real autonomous AI agent exists. There is no LLM in the engine. There is no remediation and no cluster mutation path. Real-agent admission remains blocked.
 
-![KubeTriage architecture](images/kubetriage-diagram.png)
+![KubeTriage overview](images/kubetriage-overview.png)
 
 ---
 

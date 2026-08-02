@@ -6,7 +6,7 @@ KubeTriage diagnoses Kubernetes incidents from **frozen replay evidence** — pr
 
 Deterministic diagnosis is the authority. Provenance and policy enforcement sit on top of that authority. **A6A** adds a versioned admission constitution; **A6B** (through published S2) adds a lifecycle runtime for request preparation, ledger, authority binding, and idempotency. Offline OpenClaw and LLM packages are scaffolds only. No provider boundary is admitted. Real-agent admission remains blocked even though A4A, A4B, A5A, A5B, A6A, and A6B-S2 have passed independent review.
 
-![KubeTriage end-to-end architecture](../images/kubetriage-diagram.png)
+![KubeTriage end-to-end overview](../images/kubetriage-overview.png)
 
 ## Current admitted chain
 
