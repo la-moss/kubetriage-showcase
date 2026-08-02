@@ -2,9 +2,11 @@
 
 KubeTriage's deterministic engine and runner safety are enforced in code, not
 prompts. A4A/A4B provenance binding and A5A/A5B adversarial evaluation have
-passed independent review, and the A5 programme is complete, but **real-agent
-admission remains blocked**. No real autonomous agent, provider integration,
-remediation path, or cluster mutation capability exists.
+passed independent review, and the A5 programme is complete. **A6A** (admission
+constitution) and **A6B-S2** (lifecycle ledger and idempotency) have passed
+independent review and publication. **Real-agent admission remains blocked**.
+No real autonomous agent, provider integration, remediation path, or cluster
+mutation capability exists.
 
 This document describes enforced boundaries and remaining operational/human
 gates. It does not claim that every future agent-output bypass is already
@@ -90,6 +92,30 @@ is no silent fallback to a weaker policy.
 Governed adversarial (A5A) and metamorphic (A5B) evaluation exercises that
 boundary. Passing those suites does not equal real-agent admission.
 
+## A6 admission constitution (A6A milestone)
+
+**A6A** freezes a versioned admission constitution (`kubetriage_agent_admission_constitution/v1`) that defines:
+
+- permitted and prohibited claim types for a future explanation layer;
+- refusal and insufficient-evidence invariants that must be preserved;
+- that A6A is the sole semantic admission authority — lifecycle code cannot override diagnosis, confidence, facts, or provenance.
+
+The constitution does not grant tool use, remediation, or provider access. Real-agent admission remains blocked.
+
+## A6 lifecycle runtime (A6B through S2)
+
+**A6B** adds process-local lifecycle controls for a future explanation consumer:
+
+| Slice | Scope | Status |
+| --- | --- | --- |
+| S1 | Canonical admission-request preparation and verification | Published (`v2.1.0-a6b-s1-reviewed-baseline`) |
+| S2 | Ledger, authority binding, idempotent replay, bounded transitions | Published (`v2.2.0-a6b-s2-reviewed-baseline`) |
+| S3+ | Capacity slot, serial execution, rendering custody | Blocked (draft architecture only) |
+
+Lifecycle controls are fail-closed: malformed requests, conflicts, and ledger corruption produce terminal refusals — not degraded behaviour. The lifecycle runtime does not connect to a provider, expose cluster credentials, or perform remediation.
+
+Frozen lifecycle-policy digest: `694b6d9424c5e0d48831ba374399b23025982266dbaedc311b8cc6ed12a282ae`.
+
 ## Generated sessions are unreviewed until promoted
 
 Live-capture pipelines write to generated session directories. These sessions:
@@ -136,5 +162,7 @@ current A4B stable fact-identity model.
 
 Later **A4B v3** provenance-aware admission (`agent_explanation/v3` under
 `agent_output_policy/v3`) supersedes this envelope for the admitted
-provenance-bound explanation path. Real-agent admission remains blocked by
-operational and human gates even after A5 programme completion.
+provenance-bound explanation path. **A6A/A6B** add constitution and lifecycle
+controls on top of that path. Real-agent admission remains blocked by
+operational and human gates even after A5 programme completion and A6B-S2
+publication.

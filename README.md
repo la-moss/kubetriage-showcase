@@ -28,6 +28,9 @@ deterministic: **the same evidence produces the same result every time.**
 > diagnostic authority that a future constrained explanation layer could sit
 > behind.
 
+
+KubeTriage itself is not AI: KubeTriage is not an AI Kubernetes agent, and no real autonomous AI agent exists. There is no LLM in the engine. Real-agent admission remains blocked.
+
 ---
 
 ## Why this project exists
@@ -45,6 +48,9 @@ Near critical infrastructure, an explanation should not be allowed to:
 - hide where its claims came from.
 
 KubeTriage separates diagnosis from explanation.
+
+
+It requires grounded evidence, an authority boundary, and safe execution controls. The goal is not "AI runs kubectl".
 
 The deterministic engine decides:
 
@@ -89,7 +95,7 @@ There is no hidden state, online learning, randomness or wall-clock dependency.
 | A shell wrapper | Arbitrary commands and shell execution are not permitted. |
 | A live production diagnostic service | Replay evidence remains the diagnostic source of truth. |
 | An autonomous AI agent | No real autonomous agent has been admitted. |
-| Complete Kubernetes incident coverage | It supports seven bounded incident classes and returns `insufficient_evidence` for unsupported cases. |
+| Unrestricted incident coverage | It supports seven bounded incident classes and returns `insufficient_evidence` for unsupported cases. |
 | A replacement for an SRE | It provides evidence-backed reports; a human decides what to do next. |
 
 Safety is enforced in code, not prompts.
@@ -98,7 +104,7 @@ Safety is enforced in code, not prompts.
 
 ## Current diagnostic coverage
 
-KubeTriage currently supports seven top-level incident classes:
+KubeTriage currently supports seven top-level deterministic incident classes:
 
 | Class | What it means |
 | --- | --- |
@@ -121,6 +127,8 @@ does not match one of the supported classes.
 ---
 
 ## How it works
+
+Deterministic OpenClaw output validation is a boundary milestone, not real-agent admission.
 
 ```text
 Frozen read-only evidence
@@ -160,11 +168,13 @@ SIGNAL_INGESTION
 A drift recheck is a complete recomputation from the updated evidence. KubeTriage
 does not patch the previous answer or allow confidence to inflate after drift.
 
-![KubeTriage architecture](images/kubeclaw-diagram.png)
+![KubeTriage architecture](images/kubetriage-diagram.png)
 
 ---
 
 ## Replay is the source of truth
+
+The reviewed corpus contains 20 golden sessions, 24 holdout sessions, and 44 sessions in total.
 
 Most diagnostic systems are tested against live environments that continue to
 change while the test is running.
@@ -420,12 +430,13 @@ layer could consume, including:
 - support-set identity validation;
 - adversarial testing;
 - property and transformation testing;
-- deterministic rendering.
+- deterministic rendering;
+- a versioned admission constitution (A6A);
+- a lifecycle runtime for request preparation, ledger, and idempotency (A6B through S2).
 
 That still does not mean a real agent should be connected.
 
-Real-agent admission remains blocked because operational questions still need to
-be addressed, including:
+The **A6 controlled explanation-agent admission** programme is in progress after A5 completion. **A6A** (admission constitution) and **A6B-S2** (lifecycle ledger and authority binding) have passed independent review and publication. **A6B-S3** and later slices, plus **A6C–A6G**, remain blocked. Real-agent admission remains blocked because operational questions still need to be addressed, including:
 
 - provider and model isolation;
 - authentication and authorisation;
@@ -465,8 +476,16 @@ There is currently:
 | Governed adversarial admission corpus | **Passed independent review — 102/102** |
 | Property and metamorphic evaluation | **Passed independent review — 67/67** |
 | A5 adversarial evaluation programme | **Complete** |
+| A6A — agent admission constitution | **Complete** (A6A-H1 passed) |
+| A6B-S1 — admission request preparation | **Published** (`v2.1.0-a6b-s1-reviewed-baseline`) |
+| A6B-S2 — lifecycle ledger and idempotency | **Published** (`v2.2.0-a6b-s2-reviewed-baseline`) |
+| A6B-S3+ and A6C–A6G | **Blocked / not started** |
 | Real-agent admission | **Blocked** |
 | Remediation or cluster mutation | **Not implemented** |
+
+**Latest reviewed baseline tag:** `v2.2.0-a6b-s2-reviewed-baseline`
+
+See [docs/current-status.md](docs/current-status.md) for a five-minute briefing.
 
 ---
 
@@ -608,6 +627,7 @@ The showcase does not include:
 
 | Document | Purpose |
 | --- | --- |
+| [Current status](docs/current-status.md) | Five-minute briefing after A6B-S2 reviewed baseline |
 | [Architecture](docs/architecture.md) | Data flow, components and invariants |
 | [Safety model](docs/safety-model.md) | Read-only boundaries, refusals and governance |
 | [Demo walkthrough](docs/demo-walkthrough.md) | How to present KubeTriage in 3–10 minutes |

@@ -92,7 +92,7 @@ Offline prompt/policy scaffold. **No real LLM is called.** Not the admitted v3 p
 
 - **Replay-first.** Every test and evaluation runs against frozen evidence files. No live cluster is needed for the core demo.
 
-- **A5 complete; admission blocked.** Adversarial and metamorphic evaluation passed independent review. Operational and human gates still block real-agent admission.
+- **A5 complete; A6 in progress; admission blocked.** Adversarial and metamorphic evaluation passed independent review. A6A (constitution) and A6B-S2 (lifecycle ledger) are published reviewed baselines. A6B-S3+ and A6C–A6G remain blocked. Operational and human gates still block real-agent admission.
 
 ### Safety model
 
@@ -123,7 +123,7 @@ This is the strongest single-session demo. It shows diagnosis, drift, safety, an
 5. Confidence does not inflate. Post-drift confidence (0.76) is lower than pre-drift (0.88) because merged evidence contains contradictions.
 6. No remediation is executed. A human decides what to do next.
 
-No real autonomous AI agent currently exists. A4A/A4B/A5A/A5B have passed independent review and A5 is complete as an evaluation programme, but real-agent admission remains blocked by operational isolation review and human-approval gates.
+No real autonomous AI agent currently exists. A4A/A4B/A5A/A5B have passed independent review and A5 is complete as an evaluation programme. A6A (admission constitution) and A6B-S2 (lifecycle ledger and idempotency) are the latest published reviewed baselines (`v2.2.0-a6b-s2-reviewed-baseline`). A6B-S3+ and A6C–A6G remain blocked. Real-agent admission remains blocked by operational isolation review and human-approval gates.
 
 ---
 
@@ -155,4 +155,5 @@ Live capture is local-only, optional, and not required for the core demo. Replay
 | "It fixes things" | No. Strictly read-only. All write verbs are refused. |
 | "It trains on data" | No. Evidence creates replay fixtures (after human review), not model updates. |
 | "It adapts automatically" | No. Engine changes only through deliberate, reviewed code changes. |
-| "A5 means a real agent is ready" | No. A5 is complete as evaluation; real-agent admission remains blocked. |
+| "A5 means a real agent is ready" | No. A5 is complete as evaluation; A6 lifecycle work is in progress; real-agent admission remains blocked. |
+| "A6B-S2 means a provider is connected" | No. S2 is process-local ledger and idempotency only — no provider SDK or network calls. |
