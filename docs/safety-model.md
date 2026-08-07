@@ -5,8 +5,12 @@ prompts. A4A/A4B provenance binding and A5A/A5B adversarial evaluation have
 passed independent review, and the A5 programme is complete. **A6A** (admission
 constitution) and **A6B-S2** (lifecycle ledger and idempotency) have passed
 independent review and publication. **Real-agent admission remains blocked**.
-No real autonomous agent, provider integration, remediation path, or cluster
-mutation capability exists.
+No autonomous agent is currently connected to or admitted by KubeTriage. No
+provider integration, remediation path, or cluster mutation capability exists.
+
+KubeTriage consumes governed evidence for diagnosis. It is not an observability,
+monitoring, or telemetry platform, and it does not replace systems that produce
+evidence.
 
 This document describes enforced boundaries and remaining operational/human
 gates. It does not claim that every future agent-output bypass is already
@@ -14,7 +18,7 @@ impossible in a production deployment.
 
 ## Read-only evidence capture
 
-All diagnostic inputs come from frozen tool outputs. The engine never executes write or mutation operations against a cluster during diagnosis. Evidence capture (when used) is restricted to read-only kubectl commands mapped to the six logical tools.
+All diagnostic inputs come from frozen tool outputs. The engine never executes write or mutation operations against a cluster during diagnosis. In the current implementation, evidence capture (when used) is restricted to read-only kubectl commands mapped to the six logical tools. Broader evidence domains remain architectural scope only.
 
 ## Six logical tools
 

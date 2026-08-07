@@ -123,7 +123,7 @@ This is the strongest single-session demo. It shows diagnosis, drift, safety, an
 5. Confidence does not inflate. Post-drift confidence (0.76) is lower than pre-drift (0.88) because merged evidence contains contradictions.
 6. No remediation is executed. A human decides what to do next.
 
-No real autonomous AI agent currently exists. A4A/A4B/A5A/A5B have passed independent review and A5 is complete as an evaluation programme. A6A (admission constitution) and A6B-S2 (lifecycle ledger and idempotency) are the latest published reviewed baselines (`v2.2.0-a6b-s2-reviewed-baseline`). A6B-S3+ and A6C–A6G remain blocked. Real-agent admission remains blocked by operational isolation review and human-approval gates.
+No autonomous agent is currently connected to or admitted by KubeTriage. A4A/A4B/A5A/A5B have passed independent review and A5 is complete as an evaluation programme. A6A (admission constitution) and A6B-S2 (lifecycle ledger and idempotency) are the latest published reviewed baselines (`v2.2.0-a6b-s2-reviewed-baseline`). A6B-S3+ and A6C–A6G remain blocked. Real-agent admission remains blocked by operational isolation review and human-approval gates.
 
 ---
 
@@ -142,7 +142,7 @@ Live capture is local-only, optional, and not required for the core demo. Replay
 
 ## Interview pitch
 
-> KubeTriage is not an AI that randomly runs kubectl. It is the deterministic, evaluated, safety-bounded diagnostic layer that an AI would need before it should be trusted near Kubernetes.
+> KubeTriage is a deterministic evidence engine for cloud-native incident diagnosis. Today it is proven on Kubernetes replay evidence; it is not an observability platform, not a remediator, and not an AI that invents a diagnosis.
 
 ---
 
@@ -157,3 +157,5 @@ Live capture is local-only, optional, and not required for the core demo. Replay
 | "It adapts automatically" | No. Engine changes only through deliberate, reviewed code changes. |
 | "A5 means a real agent is ready" | No. A5 is complete as evaluation; A6 lifecycle work is in progress; real-agent admission remains blocked. |
 | "A6B-S2 means a provider is connected" | No. S2 is process-local ledger and idempotency only — no provider SDK or network calls. |
+| "It replaces observability" | No. It consumes governed evidence and produces diagnosis; it does not collect telemetry. |
+| "It already diagnoses networking / identity / multi-cloud" | No. Broader evidence domains are architectural scope; only Kubernetes-native replay is implemented. |

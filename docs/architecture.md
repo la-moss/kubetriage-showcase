@@ -2,11 +2,42 @@
 
 ## Overview
 
-KubeTriage diagnoses Kubernetes incidents from **frozen replay evidence** — pre-recorded outputs from a strict six-tool allowlist. The engine is fully deterministic: no LLM calls, no randomness, no live cluster access during diagnosis, and no write operations.
+KubeTriage is a **deterministic diagnostic engine for cloud-native systems**. It diagnoses from **frozen, read-only evidence** — not from live cluster access during diagnosis. The engine has no LLM calls, no randomness, and no write operations.
+
+**Current implementation:** governed inputs are Kubernetes-native replay evidence — pre-recorded outputs from a strict six-tool allowlist — and seven bounded incident classes.
+
+**Architectural scope:** the diagnostic pipeline is designed to accommodate additional governed operational evidence sources over time while preserving determinism, provenance, replayability, and bounded authority. Those additional sources are **not implemented**.
 
 Deterministic diagnosis is the authority. Provenance and policy enforcement sit on top of that authority. **A6A** adds a versioned admission constitution; **A6B** (through published S2) adds a lifecycle runtime for request preparation, ledger, authority binding, and idempotency. Offline OpenClaw and LLM packages are scaffolds only. No provider boundary is admitted. Real-agent admission remains blocked even though A4A, A4B, A5A, A5B, A6A, and A6B-S2 have passed independent review.
 
-![KubeTriage end-to-end overview](../images/kubetriage-overview.png)
+![KubeTriage overview — current Kubernetes implementation](../images/kubetriage-overview.png)
+
+## Where KubeTriage fits
+
+KubeTriage sits in the diagnostic reasoning layer. Observability and infrastructure systems produce operational evidence; KubeTriage consumes governed subsets of that evidence and produces a replayable diagnosis. It does not replace observability, monitoring, or telemetry collection, and it does not remediate.
+
+```text
+operational evidence
+  → validation
+  → fact extraction
+  → hypothesis evaluation
+  → confidence
+  → provenance
+  → replayable diagnosis
+```
+
+Potential evidence domains for that reasoning (examples only — not a claim of current coverage) include workload/resource state, configuration, Kubernetes events, logs, service and endpoint state, networking evidence, DNS, identity, policy, deployment history, and infrastructure state. Today only the Kubernetes-native six-tool replay path is implemented.
+
+| Responsibility | In scope for KubeTriage |
+| --- | --- |
+| Validate and redact governed evidence | Yes |
+| Extract typed facts with exact citations | Yes |
+| Rank hypotheses and calculate confidence | Yes |
+| Produce replayable, provenance-bound diagnostic results | Yes |
+| Collect telemetry / monitor infrastructure | No |
+| Remediate or mutate cluster state | No |
+
+Diagnosis and explanation remain separate: the engine decides the diagnostic result; any future explanation consumer may describe an admitted result but must not change it.
 
 ## Current admitted chain
 
@@ -114,6 +145,9 @@ Replay Evidence (frozen tool outputs)
 ## Key invariants
 
 - **Replay evidence is the source of truth.** Diagnosis runs against frozen tool outputs. The engine does not call kubectl during replay.
+- **Evidence model is governed and currently Kubernetes-native.** Additional governed operational evidence sources are architectural scope only; they are not present in the current implementation.
+- **KubeTriage is not an observability platform.** Capture (when used) is a separate local lab concern; diagnosis consumes frozen evidence and does not replace systems that produce it.
+- **Seven incident classes are the current proof point.** They are not the permanent architectural boundary of the diagnostic engine.
 - **Live Kubernetes is optional and local-only.** A dedicated kind lab can capture read-only evidence into generated sessions. Capture is not diagnosis. Generated sessions are unreviewed until promoted.
 - **OpenClaw is a contract / consumer scaffold.** It is not the currently admitted real-agent path. The LLM adapter is offline-only and does not call a provider.
 - **A2 envelope vs A4B v3 path.** `agent_safe_response/v1` is an earlier authority-envelope milestone. Provenance-aware `agent_explanation/v3` under `agent_output_policy/v3` is the later admitted explanation path for provenance-bound rendering.

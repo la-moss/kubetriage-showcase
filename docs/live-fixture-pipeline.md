@@ -1,6 +1,6 @@
 # Live Fixture Pipeline
 
-This document describes the optional pipeline for generating replay fixtures from a local kind cluster. The pipeline is local-only and not required for KubeTriage diagnosis, evaluation, or the sample outputs in this showcase.
+This document describes the optional pipeline for generating replay fixtures from a local kind cluster. The pipeline is local-only and not required for KubeTriage diagnosis, evaluation, or the sample outputs in this showcase. Capture produces governed evidence for the diagnostic engine; it is not an observability or monitoring product.
 
 Normal KubeTriage tests, demos, replay, and evaluation remain fully offline and do not require kind, kubectl, Docker, a live cluster, or network access.
 

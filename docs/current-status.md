@@ -4,11 +4,13 @@ Five-minute briefing for an engineer assessing the project after independent rev
 
 ## What it does today
 
-KubeTriage is a **deterministic, read-only** Kubernetes diagnostic engine. It diagnoses from **frozen replay evidence**, not live clusters. It extracts typed facts, classifies seven bounded incident classes, ranks hypotheses, scores confidence, optionally runs one drift recheck, seals an immutable run manifest, and can admit a provenance-aware explanation only after claim → fact → evidence verification.
+KubeTriage is a **deterministic, read-only diagnostic engine**. It diagnoses from **frozen replay evidence**, not live clusters. Today's implemented evidence path is primarily **Kubernetes-native** (six-tool allowlist replay). It extracts typed facts, classifies seven bounded incident classes, ranks hypotheses, scores confidence, optionally runs one drift recheck, seals an immutable run manifest, and can admit a provenance-aware explanation only after claim → fact → evidence verification.
+
+KubeTriage sits in the diagnostic layer: it validates evidence, extracts facts, ranks hypotheses, calculates confidence, and produces replayable results. It is **not** an observability, monitoring, or telemetry platform, and it does not replace systems that produce evidence.
 
 The **A6 controlled explanation-agent admission** programme is now in progress. The latest reviewed milestone is **A6B-S2** (request lifecycle ledger, authority binding, and idempotency). That work governs how a future explanation consumer would prepare, register, and replay admission requests — it does **not** connect a provider or admit a real agent.
 
-There is **no LLM in the engine**, **no autonomous agent**, **no remediation**, and **no cluster mutation path**.
+There is **no LLM in the engine**, **no admitted autonomous agent in KubeTriage**, **no remediation**, and **no cluster mutation path**.
 
 ## What has passed independent review
 
@@ -78,11 +80,12 @@ Frozen A6 identities (unchanged across S1/S2):
 
 Still absent / blocked:
 
-- real autonomous AI agent;
+- autonomous agent connected to or admitted by KubeTriage;
 - provider or model integration;
 - remediation;
 - live production diagnosis mode;
 - cluster mutation path;
+- non-Kubernetes governed evidence adapters (architectural scope only);
 - A6B-S3 capacity/serial execution (draft architecture only);
 - A6C–A6G operational gates.
 
@@ -90,8 +93,9 @@ Remaining gates are **operational and human**: isolation, authn/authz, credentia
 
 ## Honest limitations
 
-- Seven pattern-based classes — not unrestricted Kubernetes coverage.
-- Replay is the diagnostic source of truth.
+- Seven pattern-based classes are the current proof point — not unrestricted Kubernetes coverage and not the permanent architectural boundary.
+- Replay is the diagnostic source of truth; only Kubernetes-native governed evidence is implemented today.
+- Broader multi-source diagnosis remains architectural scope, not current capability.
 - Small corpus limits statistical calibration claims; ECE is above target and not tuned away.
 - Evaluation is governed adversarial and metamorphic testing — **not** formal verification.
 - Digests provide deterministic integrity — **not** cryptographic authenticity.
