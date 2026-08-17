@@ -11,8 +11,6 @@ Diagnostic authority is deterministic code. There is no LLM in the engine, no
 admitted autonomous AI agent, no remediation, and no production live-diagnosis
 service.
 
-![KubeTriage overview — current Kubernetes implementation](images/kubetriage-overview.png)
-
 ## Why it exists
 
 Production incidents rarely fail on a single signal. Engineers often have to
@@ -154,33 +152,42 @@ Safety is enforced in code, not prompts. See [Safety model](docs/safety-model.md
 | Exact provenance | Implemented |
 | Adversarial evaluation | **102/102** |
 | Metamorphic evaluation | **67/67** |
-| Real-incident corpus infrastructure | Reviewed / frozen |
-| Real-incident collection | Not started |
+| Real-incident corpus infrastructure | Reviewed / operational |
+| Real-incident acquisition | In progress under frozen protocol |
+| Human admission review | In progress |
 | V2 blind real-incident evaluation | Not started |
 | Autonomous AI agent | Not admitted / not present |
 | Remediation | Not implemented |
 
-Agent-admission work is intentionally paused while KubeTriage validates the
-deterministic diagnostic layer against real incidents. Earlier A6 boundary and
-lifecycle milestones remain historical reviewed work; they did not connect a
-provider or admit an autonomous agent, and they did not change the frozen
-diagnostic behaviour.
+Agent-admission work is intentionally paused while KubeTriage collects a
+support-blind real-incident corpus for later blind evaluation. Earlier A6
+boundary and lifecycle milestones remain historical reviewed work; they did
+not connect a provider or admit an autonomous agent, and they did not change
+the frozen diagnostic behaviour.
 
 ### Real-incident validation
+
+KubeTriage is collecting an independently sourced real-incident corpus.
+Acquisition is governed by a frozen support-blind protocol: acquisition
+decisions do not depend on whether KubeTriage currently supports or is
+expected to diagnose an incident.
 
 A separate V1 real-incident corpus **infrastructure** has passed the project's
 architecture and implementation review gates (local freeze:
 `v1.0.0-v1-infrastructure-reviewed-baseline`; integrity suite **158 passed**).
 That infrastructure is schemas, validators, provenance, projection, and
-integrity tooling — not a collected corpus.
+integrity tooling — not a completed corpus.
 
-No real incident has been collected. No candidate has entered the log. No V2
-real-incident evaluation has begun. No real-world diagnostic accuracy claim
-exists yet.
+Human admission is separated from later ground-truth, evidence-tier, domain,
+representability, mechanism-critical adjudication, and V2 evaluation work.
+The first real admission path has passed independent persistence review.
+Acquisition is continuing under the frozen protocol.
 
-Real-incident acquisition has not begun. The current gate is freezing the
-deterministic holdout-selection procedure so the first real-incident corpus can
-be collected and split without operator discretion or evaluation leakage.
+No V2 blind real-incident evaluation has begun. No real-world diagnostic
+accuracy claim exists yet. The diagnostic engine remains frozen at the v2.8
+baseline during this collection and evaluation setup; it has not been changed
+or tuned from real-incident results. Real-incident acquisition and admission
+are not training data, online learning, or model training.
 
 ## Evaluation
 
@@ -204,9 +211,10 @@ KubeTriage computes confidence from explicit evidence inputs and measures
 calibration separately from diagnostic accuracy. Accuracy and calibration are
 different claims. These numbers are controlled-corpus results only.
 
-More detail and frozen digests:
-**[docs/current-status.md](docs/current-status.md)** (older A6-era briefing;
-baseline tag in that file is superseded by the v2.8 freeze above).
+Controlled-evaluation numbers and frozen A5 digests are retained in
+**[docs/current-status.md](docs/current-status.md)** (historical A6-era
+briefing; not the authoritative current-status source — see the v2.8 freeze
+above).
 
 ## Try the samples
 
@@ -260,7 +268,9 @@ Current implementation constraints:
 - Small controlled evaluation corpus; calibration figures are not broad
   production claims.
 - ECE remains above target and is documented, not tuned away.
-- No real-incident corpus collected; no V2 real-incident evaluation yet.
+- Real-incident corpus acquisition is in progress; the corpus is not yet
+  complete and V2 blind real-incident evaluation has not begun. Real-world
+  diagnostic reliability has not yet been established.
 - Deterministic integrity checking — not cryptographic authenticity.
 - No autonomous agent, provider / model, remediation, or unrestricted
   production cluster access.
@@ -278,7 +288,7 @@ full implementation, test suites, or governed replay corpora.
 
 | Document | Purpose |
 | --- | --- |
-| [Current status](docs/current-status.md) | Older detailed gate table and evaluation numbers (see v2.8 baseline note above) |
+| [A6-era status briefing](docs/current-status.md) | Historical A4–A6B-S2 gates and controlled-evaluation numbers (not current validation status; see v2.8 baseline above) |
 | [Architecture](docs/architecture.md) | Data flow, components, and invariants |
 | [Safety model](docs/safety-model.md) | Read-only boundaries, refusals, and governance |
 | [Demo walkthrough](docs/demo-walkthrough.md) | How to present KubeTriage in 3–10 minutes |
@@ -288,5 +298,6 @@ full implementation, test suites, or governed replay corpora.
 
 > KubeTriage is a deterministic evidence engine for bounded incident diagnosis:
 > it turns governed operational evidence into replayable, evidence-backed
-> conclusions — currently proven on Kubernetes-native controlled replay inputs,
-> not yet validated on a real-incident corpus.
+> conclusions — currently validated on controlled Kubernetes replay inputs,
+> with support-blind real-incident corpus acquisition underway ahead of blind
+> real-world evaluation.

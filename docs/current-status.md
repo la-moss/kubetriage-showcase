@@ -1,6 +1,14 @@
-# KubeTriage — current status
+# KubeTriage — A6-era status briefing
 
-Five-minute briefing for an engineer assessing the project after independent review through **A6B-S2** (reviewed baseline tag `v2.2.0-a6b-s2-reviewed-baseline`).
+> **Historical document.** This briefing records independently reviewed A4–A6B-S2 gates and controlled-evaluation numbers. It is **not** the authoritative current-status source.
+>
+> **Current diagnostic authority:** frozen baseline `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`. Later A6 inventory work did not change diagnostic behaviour.
+>
+> **Current validation programme:** support-blind real-incident corpus acquisition and human admission are in progress under a frozen protocol. V2 blind real-incident evaluation has not begun. See the [README current-status table](../README.md#current-status).
+>
+> Agent-admission (A6) work is paused while that validation proceeds. Completing A5 or publishing A6B-S2 did not connect a provider or admit an autonomous agent.
+
+Five-minute historical briefing for an engineer assessing independently reviewed work through **A6B-S2** (reviewed A6 lifecycle baseline tag `v2.2.0-a6b-s2-reviewed-baseline`).
 
 ## What it does today
 
@@ -8,7 +16,7 @@ KubeTriage is a **deterministic, read-only diagnostic engine**. It diagnoses fro
 
 KubeTriage sits in the diagnostic layer: it validates evidence, extracts facts, ranks hypotheses, calculates confidence, and produces replayable results. It is **not** an observability, monitoring, or telemetry platform, and it does not replace systems that produce evidence.
 
-The **A6 controlled explanation-agent admission** programme is now in progress. The latest reviewed milestone is **A6B-S2** (request lifecycle ledger, authority binding, and idempotency). That work governs how a future explanation consumer would prepare, register, and replay admission requests — it does **not** connect a provider or admit a real agent.
+The **A6 controlled explanation-agent admission** programme produced the reviewed constitution and lifecycle baselines below. The latest reviewed A6 milestone in this briefing is **A6B-S2** (request lifecycle ledger, authority binding, and idempotency). That work governs how a future explanation consumer would prepare, register, and replay admission requests — it does **not** connect a provider or admit a real agent. A6 is paused; it is not the current validation programme.
 
 There is **no LLM in the engine**, **no admitted autonomous agent in KubeTriage**, **no remediation**, and **no cluster mutation path**.
 
@@ -51,21 +59,21 @@ There is **no LLM in the engine**, **no admitted autonomous agent in KubeTriage*
 | A5A corpus | `60504978eaa046f9fe04b4c532ebf4c6039c74e2e42caa727312f384e370bb52` |
 | A5B suite v2 | `b367b02266444c0b680b28fb97ae60c197e4e00c2673aac3285fb82fcaebd124` |
 
-## A6 programme (in progress)
+## A6 programme (historical / paused)
 
-A6 is the controlled programme for deciding whether explanation-only admission can ever be opened. It does not add remediation, live diagnosis, provider SDKs, or cluster writes.
+A6 is the controlled programme for deciding whether explanation-only admission can ever be opened. It does not add remediation, live diagnosis, provider SDKs, or cluster writes. Current project focus is V1 real-incident validation, not A6 completion.
 
 | Phase | Scope | Status |
 | --- | --- | --- |
 | A6A | Versioned admission constitution (permissions, prohibitions, admitted claims) | **Complete** |
-| A6B | Request lifecycle and isolation (preparation, ledger, idempotency, bounded transitions) | **In progress** — S2 published; S3+ blocked pending review |
+| A6B | Request lifecycle and isolation (preparation, ledger, idempotency, bounded transitions) | **Paused** — S2 published; S3+ blocked pending review |
 | A6C | Offline hostile-provider harness (mock/replay only) | Not started |
 | A6D | Authentication, authorisation and tenancy | Not started |
 | A6E | Audit, revocation and operational controls | Not started |
 | A6F | Real-provider shadow mode | Not started |
 | A6G | Human-approved explanation pilot | Not started |
 
-**Latest reviewed baseline:** `v2.2.0-a6b-s2-reviewed-baseline` (A6B-S2 ledger and authority binding).
+**Latest reviewed A6 lifecycle baseline in this briefing:** `v2.2.0-a6b-s2-reviewed-baseline` (A6B-S2 ledger and authority binding). **Current diagnostic baseline:** `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`.
 
 Frozen A6 identities (unchanged across S1/S2):
 
@@ -96,8 +104,9 @@ Remaining gates are **operational and human**: isolation, authn/authz, credentia
 - Seven pattern-based classes are the current proof point — not unrestricted Kubernetes coverage and not the permanent architectural boundary.
 - Replay is the diagnostic source of truth; only Kubernetes-native governed evidence is implemented today.
 - Broader multi-source diagnosis remains architectural scope, not current capability.
-- Small corpus limits statistical calibration claims; ECE is above target and not tuned away.
-- Evaluation is governed adversarial and metamorphic testing — **not** formal verification.
+- Small controlled-evaluation corpus limits statistical calibration claims; ECE is above target and not tuned away.
+- Real-incident corpus acquisition is in progress; the corpus is not yet complete, and V2 blind real-incident evaluation has not begun. Real-world diagnostic reliability has not yet been established.
+- Evaluation on golden / holdout / adversarial / metamorphic material is governed testing — **not** formal verification and **not** real-incident validation.
 - Digests provide deterministic integrity — **not** cryptographic authenticity.
 - Envelope-local IDs such as `ev-001` in the A2 sample are **not** the current stable fact-identity model used by A4B.
 
@@ -108,13 +117,13 @@ Remaining gates are **operational and human**: isolation, authn/authz, credentia
 
 A reviewed mixed example rises from 0.72 to 0.88 after removing a tool that also carried the sole weak support fact, clearing `mixed_evidence_dampening` (0.16 → 0.0). That is not “less evidence ⇒ more confidence.”
 
-## Next operational questions
+## Next operational questions (historical A6 framing)
 
-The diagnostic engine and A5 evaluation programme are complete. A6B-S2 closes ledger and idempotency for the lifecycle runtime; the practical questions ahead are lifecycle completion and operational admission:
+The diagnostic engine and A5 evaluation programme are complete. A6B-S2 closed ledger and idempotency for the lifecycle runtime. Those A6 questions remain blocked and paused:
 
 1. When A6B-S3+ (capacity, serial execution, rendering custody) pass review, does the lifecycle runtime remain process-local and fail-closed?
 2. What isolation and credential model would a future explanation consumer require (A6D)?
 3. What human approval and revocation process would gate any shadow trial (A6F/A6G)?
 4. How would regressions in A5 digests, A6 constitution digests, or replay baselines revoke temporary permission?
 
-Until A6G and explicit human approval, KubeTriage stays a deterministic diagnostic substrate — not an AI agent near a cluster.
+**Current programme:** support-blind real-incident acquisition and human admission under the frozen protocol, with the diagnostic engine held at the v2.8 baseline. Until A6G and explicit human approval, KubeTriage stays a deterministic diagnostic substrate — not an AI agent near a cluster.

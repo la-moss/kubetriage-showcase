@@ -8,9 +8,7 @@ KubeTriage is a **deterministic diagnostic engine for cloud-native systems**. It
 
 **Architectural scope:** the diagnostic pipeline is designed to accommodate additional governed operational evidence sources over time while preserving determinism, provenance, replayability, and bounded authority. Those additional sources are **not implemented**.
 
-Deterministic diagnosis is the authority. Provenance and policy enforcement sit on top of that authority. **A6A** adds a versioned admission constitution; **A6B** (through published S2) adds a lifecycle runtime for request preparation, ledger, authority binding, and idempotency. Offline OpenClaw and LLM packages are scaffolds only. No provider boundary is admitted. Real-agent admission remains blocked even though A4A, A4B, A5A, A5B, A6A, and A6B-S2 have passed independent review.
-
-![KubeTriage overview — current Kubernetes implementation](../images/kubetriage-overview.png)
+Deterministic diagnosis is the authority. Provenance and policy enforcement sit on top of that authority. **Current diagnostic baseline:** `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`. **A6A** adds a versioned admission constitution; **A6B** (through published S2) adds a lifecycle runtime for request preparation, ledger, authority binding, and idempotency. Agent-admission work is paused while support-blind real-incident corpus acquisition proceeds. Offline OpenClaw and LLM packages are scaffolds only. No provider boundary is admitted. Real-agent admission remains blocked even though A4A, A4B, A5A, A5B, A6A, and A6B-S2 have passed independent review.
 
 ## Where KubeTriage fits
 
@@ -70,7 +68,7 @@ admission request
   → deterministic renderer (only if constitutionally admitted)
 ```
 
-**Latest reviewed baseline:** `v2.2.0-a6b-s2-reviewed-baseline` (A6B-S2). S3 (capacity and serial execution) is draft only and blocked pending independent review.
+**Latest reviewed A6 lifecycle baseline:** `v2.2.0-a6b-s2-reviewed-baseline` (A6B-S2). S3 (capacity and serial execution) is draft only and blocked pending independent review. A6 work is paused; it is not the current validation programme. **Current diagnostic baseline:** `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`.
 
 ## Layer separation
 
@@ -91,7 +89,7 @@ admission request
                              │
                              ▼
 ┌────────────────────────────────────────────────────────────┐
-│  A6 lifecycle runtime (A6B through S2 — in progress)       │
+│  A6 lifecycle runtime (A6B through S2 — paused)            │
 │  request preparation · ledger · idempotency · transitions  │
 │  A6A constitution as sole semantic admission authority     │
 │  no provider · no remediation · real-agent still blocked   │
@@ -153,9 +151,15 @@ Replay Evidence (frozen tool outputs)
 - **A2 envelope vs A4B v3 path.** `agent_safe_response/v1` is an earlier authority-envelope milestone. Provenance-aware `agent_explanation/v3` under `agent_output_policy/v3` is the later admitted explanation path for provenance-bound rendering.
 - **Drift is bounded.** At most one drift recheck per session, always full recomputation. Post-drift confidence must not exceed pre-drift confidence.
 - **A5 is complete as an evaluation programme.** Adversarial and metamorphic suites passed independent review. That does not admit a real agent.
-- **A6 is in progress.** A6A (admission constitution) is complete. A6B-S2 (lifecycle ledger and idempotency) is the latest published reviewed baseline (`v2.2.0-a6b-s2-reviewed-baseline`). A6B-S3+ and A6C–A6G remain blocked.
+- **A6 is paused.** A6A (admission constitution) is complete. A6B-S2 (lifecycle ledger and idempotency) is the latest published reviewed A6 lifecycle baseline (`v2.2.0-a6b-s2-reviewed-baseline`). A6B-S3+ and A6C–A6G remain blocked. Current validation work is support-blind real-incident corpus acquisition, not A6 completion.
+- **Current diagnostic baseline is v2.8.** Frozen tag `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`. Real-incident acquisition and admission have not changed or tuned diagnostic behaviour. V2 blind real-incident evaluation has not begun.
 
 ## Evaluation corpora
+
+Golden, holdout, and generated sessions are **controlled** evaluation / capture
+material. They are not the independently sourced real-incident corpus.
+Real-incident acquisition is a separate support-blind programme; V2 blind
+real-incident evaluation has not begun.
 
 | Corpus | Sessions | Purpose |
 | --- | --- | --- |

@@ -1,12 +1,15 @@
 # KubeTriage Safety Model
 
 KubeTriage's deterministic engine and runner safety are enforced in code, not
-prompts. A4A/A4B provenance binding and A5A/A5B adversarial evaluation have
-passed independent review, and the A5 programme is complete. **A6A** (admission
-constitution) and **A6B-S2** (lifecycle ledger and idempotency) have passed
-independent review and publication. **Real-agent admission remains blocked**.
-No autonomous agent is currently connected to or admitted by KubeTriage. No
-provider integration, remediation path, or cluster mutation capability exists.
+prompts. **Current diagnostic baseline:**
+`v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`. A4A/A4B provenance
+binding and A5A/A5B adversarial evaluation have passed independent review, and
+the A5 programme is complete. **A6A** (admission constitution) and **A6B-S2**
+(lifecycle ledger and idempotency) have passed independent review and
+publication; A6 agent-admission work is paused while support-blind real-incident
+acquisition proceeds. **Real-agent admission remains blocked**. No autonomous
+agent is currently connected to or admitted by KubeTriage. No provider
+integration, remediation path, or cluster mutation capability exists.
 
 KubeTriage consumes governed evidence for diagnosis. It is not an observability,
 monitoring, or telemetry platform, and it does not replace systems that produce
@@ -114,7 +117,7 @@ The constitution does not grant tool use, remediation, or provider access. Real-
 | --- | --- | --- |
 | S1 | Canonical admission-request preparation and verification | Published (`v2.1.0-a6b-s1-reviewed-baseline`) |
 | S2 | Ledger, authority binding, idempotent replay, bounded transitions | Published (`v2.2.0-a6b-s2-reviewed-baseline`) |
-| S3+ | Capacity slot, serial execution, rendering custody | Blocked (draft architecture only) |
+| S3+ | Capacity slot, serial execution, rendering custody | Blocked (draft architecture only); A6 paused |
 
 Lifecycle controls are fail-closed: malformed requests, conflicts, and ledger corruption produce terminal refusals — not degraded behaviour. The lifecycle runtime does not connect to a provider, expose cluster credentials, or perform remediation.
 
@@ -169,4 +172,5 @@ Later **A4B v3** provenance-aware admission (`agent_explanation/v3` under
 provenance-bound explanation path. **A6A/A6B** add constitution and lifecycle
 controls on top of that path. Real-agent admission remains blocked by
 operational and human gates even after A5 programme completion and A6B-S2
-publication.
+publication. A6 work is paused; current validation work is support-blind
+real-incident corpus acquisition, not agent admission.
