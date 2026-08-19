@@ -1,303 +1,139 @@
 # KubeTriage
 
-**A deterministic evidence engine for bounded Kubernetes incident diagnosis.**
+**A deterministic evidence engine for bounded Kubernetes incident diagnosis — built to answer a harder question than "what's wrong with this pod": can a diagnostic system produce conclusions whose evidence, confidence, provenance, and evaluation history are reproducible and independently inspectable?**
 
-KubeTriage is a deterministic evidence engine for bounded incident diagnosis.
-The current implementation applies that model to Kubernetes: it turns governed
-operational evidence into replayable, evidence-backed diagnoses with exact
-provenance. The same evidence always produces the same result.
+KubeTriage turns governed, frozen operational evidence into replayable, evidence-backed diagnoses. The same evidence always produces the same result. Every conclusion links to the exact evidence locations that support it. When the evidence doesn't justify a conclusion, the engine says so.
 
-Diagnostic authority is deterministic code. There is no LLM in the engine, no
-admitted autonomous AI agent, no remediation, and no production live-diagnosis
-service.
+Diagnostic authority is deterministic code. Safety is enforced in code, not prompts.
 
-## Why it exists
+---
 
-Production incidents rarely fail on a single signal. Engineers often have to
-correlate workload state, configuration, events, logs, and related observations
-before they can defend a conclusion.
+## The problem it addresses
 
-That process is slow to replay and easy to dispute. Near critical
-infrastructure, an explanation should not invent evidence, change the diagnosed
-problem, inflate confidence, continue after a safety refusal, or turn a
-suggestion into a cluster action.
+Production incidents rarely fail on a single signal. Diagnosis means correlating workload state, configuration, events, and logs before you can defend a conclusion — and that reasoning is slow to replay and easy to dispute afterwards.
 
-KubeTriage is intended to make diagnostic reasoning:
+Existing Kubernetes diagnostic tools already detect common failure patterns well, typically with rule-based analyzers operating directly against live clusters, sometimes with optional AI-generated explanation (e.g., K8sGPT). KubeTriage is not trying to be a broader analyzer. It investigates a different property: **whether a narrow diagnostic system can make every conclusion auditable** — traceable through claim → typed fact → exact location in frozen evidence, with calibrated confidence, explicit abstention, and a frozen evaluation record.
 
-- **bounded** — operate only on governed evidence and supported classes;
-- **reproducible** — same evidence, same diagnosis;
-- **inspectable** — conclusions link to exact evidence locations;
-- **evidence-backed** — unsupported conclusions are rejected;
-- **confidence-aware** — confidence is derived from explicit evidence inputs.
-
-Diagnosis and explanation remain separate. Diagnosis is deterministic and
-evidence-grounded. A future explanation layer may describe an admitted result —
-it would not be allowed to change it.
-
-## Observability vs diagnosis
-
-Observability systems show what changed, where failures appeared, which metrics
-moved, and what behaviour was observed.
-
-KubeTriage answers a different question:
-
-> Given the available evidence, what is the most likely explanation, how
-> confident is that conclusion, and exactly which evidence supports it?
-
-KubeTriage does not replace observability. Observability produces evidence;
-KubeTriage reasons over governed evidence. Humans remain responsible for
-deciding and performing remediation.
+That property matters most exactly where explanations are most contested: regulated environments, post-incident review, and any setting where "the tool said so" is not an acceptable answer.
 
 ## What it does today
 
-Current implemented capability, proven on the governed Kubernetes replay path:
+On governed Kubernetes replay evidence, KubeTriage:
 
-- Frozen, read-only **Kubernetes-native** evidence via a strict six-tool
-  allowlist (`events_tail`, `describe_pod`, `describe_deploy`, `logs`,
-  `get_yaml`, `top_pod`)
-- Evidence validation, redaction, and canonicalisation
-- Typed fact extraction with exact citations
-- Seven bounded incident classes (below)
-- Hypothesis ranking and confidence scoring from explicit evidence inputs
-- At most one bounded drift recheck with full recomputation
-- Immutable run manifest and claim → fact → evidence provenance
-- Safety refusal and `insufficient_evidence` outcomes
-- Offline evaluation against golden, holdout, adversarial, and metamorphic
-  controlled corpora
+- collects evidence through a strict **six-tool read-only allowlist** (`events_tail`, `describe_pod`, `describe_deploy`, `logs`, `get_yaml`, `top_pod`) — write verbs are refused in code;
+- validates, redacts, and canonicalises evidence before any diagnostic artefact is admitted;
+- extracts **typed facts with exact citations**;
+- classifies against **seven bounded incident classes** (below);
+- ranks hypotheses and computes confidence from explicit evidence inputs — accuracy and calibration are measured as separate claims;
+- performs **at most one bounded drift recheck** with full recomputation — confidence cannot inflate silently when evidence changes;
+- seals an **immutable run manifest** with complete claim → fact → evidence provenance;
+- returns `insufficient_evidence` rather than guessing, and `refusal` — terminal, no further processing — on safety violations.
 
-Given that frozen Kubernetes evidence, KubeTriage:
+**Seven supported classes:** crashloop · imagepull · oom · pending · service_unreachable · probe_failure · config_dependency_failure
 
-1. validates the request and redacts secrets, tokens, and sensitive material;
-2. extracts typed facts with exact citations;
-3. classifies against seven bounded incident classes;
-4. ranks hypotheses and scores confidence from explicit evidence inputs;
-5. optionally performs one bounded drift recheck when new evidence arrives;
-6. seals an immutable run manifest and provenance bundle;
-7. admits operator-visible explanations only after claim → fact → evidence
-   verification.
-
-Replay is the governed diagnostic source of truth: no hidden state, no online
-learning, no randomness.
-
-## Current Kubernetes coverage
-
-KubeTriage currently supports seven top-level deterministic incident classes:
-
-| Class | Meaning |
-| --- | --- |
-| `crashloop` | Container repeatedly fails and restarts |
-| `imagepull` | Image cannot be pulled from the registry |
-| `oom` | Container killed by the OOM killer |
-| `pending` | Pod cannot be scheduled |
-| `service_unreachable` | Service has no reachable endpoints |
-| `probe_failure` | Readiness or liveness probe failing |
-| `config_dependency_failure` | Missing or invalid ConfigMap or Secret dependency |
-
-Two important non-diagnostic outcomes: **`insufficient_evidence`** (honest
-uncertainty) and **refusal** (safety violation — terminal, no further
-processing).
-
-These seven classes are bounded pattern-based coverage. They do not cover
-Kubernetes generally.
+These are bounded pattern-based coverage — the most common Kubernetes failure modes, not Kubernetes generally. Everything outside them is an honest `insufficient_evidence`.
 
 ## How it works
 
-```text
+```
 frozen read-only evidence
   → validation and redaction
   → typed facts with exact citations
   → classification → hypothesis ranking → confidence
   → optional one bounded drift recheck (full recomputation)
-  → run manifest + provenance
+  → run manifest + provenance bundle
   → provenance-aware policy validation
   → deterministic operator-visible output
 ```
 
-Six read-only logical tools only: `events_tail`, `describe_pod`,
-`describe_deploy`, `logs`, `get_yaml`, `top_pod`. Write verbs (`apply`,
-`patch`, `delete`, `exec`, …) are refused.
+Replay is the diagnostic source of truth: no hidden state, no online learning, no randomness.
 
-Local kind fixtures may be used to exercise or capture evidence, but the
-governed diagnostic / evaluation path is replayable. There is no unrestricted
-production live-diagnosis or remediation service.
+**Delivery path today:** governed read-only capture exists for local kind fixtures (`labs/kind/`, context-guarded); the diagnostic engine consumes the frozen, replayable evidence that capture produces — never live mutable cluster state. The intended operational path is:
 
-Details: [Architecture](docs/architecture.md) ·
-[Safety model](docs/safety-model.md) ·
-[Live fixture pipeline](docs/live-fixture-pipeline.md).
+```
+real cluster → bounded read-only capture → validate/redact/freeze → deterministic diagnosis → provenance report
+```
 
-## What it does not do
-
-| KubeTriage is not | Boundary |
-| --- | --- |
-| An observability, monitoring, or telemetry platform | It consumes governed evidence; it does not collect or store operational telemetry. |
-| An auto-remediator | No apply, patch, delete, restart, scale, or fixes. |
-| An LLM diagnostic engine | No model calls or provider SDKs in the engine. |
-| A trained ML diagnostic model | Behaviour is deterministic code, not learned inference. |
-| A production live-diagnosis service | Governed replay evidence is the diagnostic source of truth. |
-| An autonomous AI agent | No autonomous agent is connected to or admitted by KubeTriage. |
-| Unrestricted incident coverage | Seven pattern-based classes today; returns `insufficient_evidence` otherwise. |
-| A multi-source cloud-native evidence platform today | Broader evidence domains are architectural direction, not current capability. |
-
-Safety is enforced in code, not prompts. See [Safety model](docs/safety-model.md).
-
-## Current status
-
-**Frozen diagnostic baseline:**
-`v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`
-
-| Area | Status |
-| --- | --- |
-| Deterministic diagnostic engine | Implemented |
-| Controlled replay evaluation | Implemented (golden 20/20, holdout 24/24) |
-| Exact provenance | Implemented |
-| Adversarial evaluation | **102/102** |
-| Metamorphic evaluation | **67/67** |
-| Real-incident corpus infrastructure | Reviewed / operational |
-| Real-incident acquisition | In progress under frozen protocol |
-| Human admission review | In progress |
-| V2 blind real-incident evaluation | Not started |
-| Autonomous AI agent | Not admitted / not present |
-| Remediation | Not implemented |
-
-Agent-admission work is intentionally paused while KubeTriage collects a
-support-blind real-incident corpus for later blind evaluation. Earlier A6
-boundary and lifecycle milestones remain historical reviewed work; they did
-not connect a provider or admit an autonomous agent, and they did not change
-the frozen diagnostic behaviour.
-
-### Real-incident validation
-
-KubeTriage is collecting an independently sourced real-incident corpus.
-Acquisition is governed by a frozen support-blind protocol: acquisition
-decisions do not depend on whether KubeTriage currently supports or is
-expected to diagnose an incident.
-
-A separate V1 real-incident corpus **infrastructure** has passed the project's
-architecture and implementation review gates (local freeze:
-`v1.0.0-v1-infrastructure-reviewed-baseline`; integrity suite **158 passed**).
-That infrastructure is schemas, validators, provenance, projection, and
-integrity tooling — not a completed corpus.
-
-Human admission is separated from later ground-truth, evidence-tier, domain,
-representability, mechanism-critical adjudication, and V2 evaluation work.
-The first real admission path has passed independent persistence review.
-Acquisition is continuing under the frozen protocol.
-
-No V2 blind real-incident evaluation has begun. No real-world diagnostic
-accuracy claim exists yet. The diagnostic engine remains frozen at the v2.8
-baseline during this collection and evaluation setup; it has not been changed
-or tuned from real-incident results. Real-incident acquisition and admission
-are not training data, online learning, or model training.
+General real-cluster capture is a post-evaluation roadmap item, not current capability. See [Architecture](docs/architecture.md) · [Safety model](docs/safety-model.md) · [Live fixture pipeline](docs/live-fixture-pipeline.md).
 
 ## Evaluation
 
-Golden, holdout, adversarial, and metamorphic material is controlled evaluation
-material. It is not a real-incident corpus, and KubeTriage was not trained on
-it.
+KubeTriage is being evaluated in two tiers, and the distinction between them is the point.
 
-KubeTriage currently performs strongly on its small controlled evaluation
-corpus, but that does not establish real-world diagnostic reliability.
+### Tier 1 — controlled corpora (complete)
 
-Controlled holdout metrics (14 non-drift diagnostic sessions):
+Golden, holdout, adversarial, and metamorphic suites, all synthetic and author-constructed:
 
-| Metric | Value |
-| --- | --- |
-| Top-1 diagnostic accuracy | 100% |
-| Brier | 0.0557 |
-| ECE | 0.2186 *(above 0.15 target on this small set)* |
-| False high-confidence (≥ 0.80) | 0 |
+| Suite | Result |
+|---|---|
+| Golden | 20/20 |
+| Controlled holdout | 24/24 (14 non-drift sessions: top-1 100%, Brier 0.0557, 0 false high-confidence) |
+| Adversarial | 102/102, zero unexpected admissions |
+| Metamorphic | 67/67 |
 
-KubeTriage computes confidence from explicit evidence inputs and measures
-calibration separately from diagnostic accuracy. Accuracy and calibration are
-different claims. These numbers are controlled-corpus results only.
+These establish that the engine behaves correctly on material constructed around it. ECE on the holdout is 0.2186 — above the 0.15 target on this small set, reported rather than tuned away. **None of this establishes real-world diagnostic reliability**, and it is not presented as doing so.
 
-Controlled-evaluation numbers and frozen A5 digests are retained in
-**[docs/current-status.md](docs/current-status.md)** (historical A6-era
-briefing; not the authoritative current-status source — see the v2.8 freeze
-above).
+### Tier 2 — independently occurring real incidents (in progress)
+
+The evaluation that actually matters is being built under governance designed to keep it honest:
+
+- **Support-blind acquisition**: a frozen, versioned acquisition protocol (`V1-RIC-ACQ-PROTOCOL-L1-001`) governs how real incidents are discovered. Acquisition decisions are blind to whether KubeTriage supports the failure mode — the corpus cannot quietly become a dataset selected around the engine's strengths.
+- **Staged separation**: discovery, human admission, ground-truth adjudication, and representability analysis are separate decisions. Admission does not depend on engine capability.
+- **Blinded ground truth**: per-family ground truth is frozen before any engine output for that family is generated or viewed.
+- **Pre-committed analysis**: the V2 analysis plan — endpoints, denominators, calibration rules, and what claims are permissible at whatever corpus size the hard stop produces — is frozen before evaluation begins.
+- **Honest stopping**: acquisition targets ≥30 admitted incident families with an independent hard stop of 2026-11-09. If the hard stop arrives first, the corpus closes at whatever size it reached, and that limitation is reported, not worked around.
+
+Corpus state counters are published at [docs/current-status.md](docs/current-status.md); acquisition is currently open. The diagnostic engine remains frozen at `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline` throughout — nothing learned from real incidents touches it until the blind evaluation is complete.
+
+The expected result may be about **coverage as much as accuracy**: if the seven classes cover only a fraction of independently occurring incidents, that is a more informative finding than a headline percentage, and the analysis plan is built to report it.
+
+## Safety and boundaries
+
+| Property | Enforcement |
+|---|---|
+| Read-only | Six-tool allowlist; write verbs refused in code |
+| No remediation | No apply, patch, delete, restart, scale — humans decide and perform fixes |
+| Diagnosis ≠ explanation | Diagnosis is deterministic; any future explanation layer may describe an admitted result but cannot change it |
+| Bounded authority | Seven classes; `insufficient_evidence` and terminal `refusal` are first-class outcomes |
+| No autonomous agent | No provider or model is admitted into the diagnostic path |
+
+Earlier project phases (A4–A6) built and tested agent-admission policy, output contracts, and offline scaffolds to establish where authority boundaries would sit if an explanation agent were ever admitted. No provider-driven agent loop ever operated; that work is documented in [project history](docs/project-history.md).
 
 ## Try the samples
 
-Representative outputs from the main KubeTriage implementation (no live cluster
-required):
+Representative outputs, no cluster required:
 
-### Core diagnostic demos
+- [Image-pull diagnosis](samples/imagepull.md) — normal deterministic diagnosis (confidence 0.88)
+- [Drift class flip](samples/drift-flip.md) — full recomputation under new evidence; confidence does not inflate
+- [Safety refusal](samples/refusal.md) — terminal refusal for unsafe cluster context
+- [Provenance bundle](samples/provenance.md) — claim → fact → evidence chain end to end
+- [Confidence decomposition](samples/confidence.md) — mixed-information removal explained mechanically (0.72 → 0.88)
 
-| Sample | Demonstrates |
-| --- | --- |
-| [Image-pull diagnosis](sample-output/engine-imagepull-demo.txt) | Normal deterministic diagnosis (`imagepull`, confidence 0.88) |
-| [Drift class flip](sample-output/engine-drift-demo.txt) | Full drift recomputation; confidence does not inflate |
-| [Safety refusal](sample-output/engine-refusal-demo.txt) | Terminal refusal for unsafe cluster context |
-| [Combined session output](sample-output/demo-session-outputs.txt) | All three paths in one file |
+Presenter script: [docs/demo-walkthrough.md](docs/demo-walkthrough.md).
 
-### Provenance and evaluation
+## Limitations
 
-| Sample | Demonstrates |
-| --- | --- |
-| [Provenance-aware explanation](sample-output/provenance-aware-explanation-demo.json) | Accepted `agent_explanation/v3` under `agent_output_policy/v3` |
-| [Adversarial evaluation summary](sample-output/adversarial-evaluation-summary.json) | Adversarial corpus: 102/102, zero unexpected admissions |
-| [Metamorphic evaluation summary](sample-output/metamorphic-evaluation-summary.json) | Metamorphic suite v2: 67/67, pure vs mixed removal distinction |
-| [Confidence decomposition](sample-output/confidence-decomposition-demo.json) | Reviewed mixed-information removal (0.72 → 0.88 explained mechanically) |
+- Seven pattern-based classes — not broad Kubernetes or cloud-native coverage.
+- Small controlled evaluation corpus; Tier 1 numbers are not production claims.
+- Real-world diagnostic reliability is **not yet established** — the Tier 2 evaluation has not run.
+- Replay artefacts carry deterministic integrity checking; governance artefacts (protocol freezes) carry cryptographic hashes with external timestamps. Neither is a claim of cryptographic authenticity of cluster evidence itself.
+- Single maintainer; no independent multi-rater adjudication yet.
+- The main implementation repository is currently private; this showcase carries the verification pack below so that public claims remain inspectable.
 
-### Earlier boundary milestones (labelled legacy)
+## Verifying these claims
 
-| Sample | Demonstrates |
-| --- | --- |
-| [Safe response envelope](sample-output/agent-safe-response-demo.json) | Earlier `agent_safe_response/v1` authority envelope — envelope-local IDs such as `ev-001` are **not** current stable fact identity |
-| [Deterministic consumer](sample-output/agent-consumer-demo.txt) | Offline `agent_output_policy/v2` scaffold — not the v3 provenance path |
-| [LLM policy rejection](sample-output/llm-policy-demo.txt) | Offline policy scaffold — no real LLM is called |
+- Frozen engine baseline digest: `[baseline digest]` — recorded at `[external timestamp location]`
+- Acquisition protocol v1.1.0 hash: `e34b4546…51f1e5c` — recorded at `[location]`
+- V2 analysis plan hash: `[to be added at Stage 1 freeze]`
+- Corpus state counters (counts only, never contents): [docs/current-status.md](docs/current-status.md)
+- Sample provenance bundles: [samples/](samples/)
 
-Presenter script: **[docs/demo-walkthrough.md](docs/demo-walkthrough.md)**.
+Where an artefact cannot be published while the implementation is private, the limitation is stated rather than elided.
 
-## Current limitations
+## Docs
 
-| Architectural direction | Implemented today |
-| --- | --- |
-| Deterministic, evidence-grounded diagnosis with provenance and replay | Yes — for governed Kubernetes-native replay evidence |
-| Diagnosis separated from explanation | Yes — no autonomous explanation agent admitted |
-| Multiple governed operational evidence sources | Architectural direction only — not implemented |
-| Constrained explanation consumer behind the diagnostic authority | Future direction; agent-admission work paused; no provider connected |
+[Architecture](docs/architecture.md) · [Safety model](docs/safety-model.md) · [Live fixture pipeline](docs/live-fixture-pipeline.md) · [Evaluation methodology](docs/evaluation-methodology.md) · [Project history](docs/project-history.md) · [Current status](docs/current-status.md)
 
-Current implementation constraints:
+---
 
-- Seven pattern-based Kubernetes classes — not every Kubernetes failure mode,
-  and not a claim of broad cloud-native coverage.
-- Broader multi-source diagnosis (networking, DNS, identity, policy,
-  infrastructure state, external observability feeds) remains architectural
-  direction, not current capability.
-- Small controlled evaluation corpus; calibration figures are not broad
-  production claims.
-- ECE remains above target and is documented, not tuned away.
-- Real-incident corpus acquisition is in progress; the corpus is not yet
-  complete and V2 blind real-incident evaluation has not begun. Real-world
-  diagnostic reliability has not yet been established.
-- Deterministic integrity checking — not cryptographic authenticity.
-- No autonomous agent, provider / model, remediation, or unrestricted
-  production cluster access.
-
-The system returns `insufficient_evidence` rather than guessing when evidence
-does not justify a supported diagnosis.
-
-## About this repository
-
-This repository is the public showcase layer. The main
-[KubeTriage](https://github.com/la-moss/KubeTriage) repository contains the
-implementation and technical project history; this repository focuses on
-architecture, status, and representative outputs. It does not duplicate the
-full implementation, test suites, or governed replay corpora.
-
-| Document | Purpose |
-| --- | --- |
-| [A6-era status briefing](docs/current-status.md) | Historical A4–A6B-S2 gates and controlled-evaluation numbers (not current validation status; see v2.8 baseline above) |
-| [Architecture](docs/architecture.md) | Data flow, components, and invariants |
-| [Safety model](docs/safety-model.md) | Read-only boundaries, refusals, and governance |
-| [Demo walkthrough](docs/demo-walkthrough.md) | How to present KubeTriage in 3–10 minutes |
-| [Live fixture pipeline](docs/live-fixture-pipeline.md) | Optional local kind capture workflow |
-
-## In one sentence
-
-> KubeTriage is a deterministic evidence engine for bounded incident diagnosis:
-> it turns governed operational evidence into replayable, evidence-backed
-> conclusions — currently validated on controlled Kubernetes replay inputs,
-> with support-blind real-incident corpus acquisition underway ahead of blind
-> real-world evaluation.
+*KubeTriage is a research and engineering portfolio project by [L. A. Moss](https://github.com/la-moss), exploring what trustworthy, auditable diagnostic systems require — determinism, provenance, abstention, and evaluation methodology that can distinguish genuine evidence from evidence shaped by how the test data was selected.*
