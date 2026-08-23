@@ -246,8 +246,7 @@ Representative public outputs require no cluster:
 
 ## For technical reviewers
 
-The actual implementation, tests and specifications are in the public
-[KubeTriage repository](https://github.com/la-moss/KubeTriage).
+The actual implementation, tests and specifications are in the private repo. If you wish to review my work, please contact me on my [LinkedIn](https://www.linkedin.com/in/lam-ai/)
 
 Start with the
 [technical review guide](https://github.com/la-moss/KubeTriage/blob/main/docs/technical-review-guide.md).
