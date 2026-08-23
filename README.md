@@ -14,7 +14,7 @@ KubeTriage currently diagnoses seven bounded Kubernetes incident classes and is
 being evaluated through controlled replay, adversarial and metamorphic testing,
 and a prospective blind real-incident validation programme.
 
-The implementation lives in the public [KubeTriage repository](https://github.com/la-moss/KubeTriage).
+The implementation lives in the private repo
 
 ## Current status
 
