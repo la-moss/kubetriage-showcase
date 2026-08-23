@@ -152,7 +152,7 @@ Replay Evidence (frozen tool outputs)
 - **Drift is bounded.** At most one drift recheck per session, always full recomputation. Post-drift confidence must not exceed pre-drift confidence.
 - **A5 is complete as an evaluation programme.** Adversarial and metamorphic suites passed independent review. That does not admit a real agent.
 - **A6 is paused.** A6A (admission constitution) is complete. A6B-S2 (lifecycle ledger and idempotency) is the latest published reviewed A6 lifecycle baseline (`v2.2.0-a6b-s2-reviewed-baseline`). A6B-S3+ and A6C–A6G remain blocked. Current validation work is support-blind real-incident corpus acquisition, not A6 completion.
-- **Current diagnostic baseline is v2.8.** Frozen tag `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`. Real-incident acquisition and admission have not changed or tuned diagnostic behaviour. V2 blind real-incident evaluation has not begun.
+- **Current diagnostic baseline is v2.8.** Frozen tag `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`. Real-incident acquisition and admission have not changed or tuned diagnostic behaviour. The V2 analysis plan is frozen; V2 diagnostic execution has not begun.
 
 ## Evaluation corpora
 

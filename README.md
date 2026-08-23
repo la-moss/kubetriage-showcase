@@ -246,7 +246,7 @@ The mechanical GT and blinding authority has been implemented and independently 
 
 #### Pre-committed analysis
 
-Before V2 begins, the analysis plan will be frozen prospectively.
+Before V2 execution begins, the analysis plan was frozen prospectively.
 
 It will define, before results are revealed:
 
@@ -263,7 +263,7 @@ It will define, before results are revealed:
 - reporting requirements;
 - permissible claims given the eventual corpus size.
 
-The V2 analysis plan is **not yet frozen**, and no V2 scoring result currently exists.
+The V2 analysis plan is **frozen** as evaluation methodology. V2 diagnostic execution has **not** started, and no V2 scoring result currently exists.
 
 #### Honest stopping
 
@@ -403,10 +403,13 @@ No independent external timestamp is claimed here.
 
 ```text
 status:
-NOT YET FROZEN
+FROZEN (methodology)
+
+V2 diagnostic execution:
+NOT STARTED
 ```
 
-Its version, digest, and any external commitment will be published only after the prospective analysis plan passes its review gate.
+A frozen analysis plan is not an executed evaluation. No V2 scores or reveal exist.
 
 ### Public evidence
 

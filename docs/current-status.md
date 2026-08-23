@@ -15,7 +15,7 @@ V2 blind evaluation: NOT STARTED
 **Acquisition protocol:** `V1-RIC-ACQ-PROTOCOL-L1-001`  
 **Active version:** `1.1.0`
 
-Real ground-truth adjudication has not begun. The V2 analysis plan is not yet frozen.
+Real ground-truth adjudication has not begun. The V2 analysis plan is frozen; V2 diagnostic execution has not started.
 
 See the [README current programme](../README.md#current-programme).
 
@@ -27,7 +27,7 @@ See the [README current programme](../README.md#current-programme).
 >
 > **Current diagnostic authority:** frozen baseline `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`. Later A6 inventory work did not change diagnostic behaviour.
 >
-> **Current validation programme:** support-blind real-incident corpus acquisition and human admission are in progress under a frozen protocol. V2 blind real-incident evaluation has not begun.
+> **Current validation programme:** support-blind real-incident corpus acquisition and human admission are in progress under a frozen protocol. The V2 analysis plan is frozen; V2 diagnostic execution has not begun.
 >
 > Agent-admission (A6) work is paused while that validation proceeds. Completing A5 or publishing A6B-S2 did not connect a provider or admit an autonomous agent.
 
@@ -128,7 +128,7 @@ Remaining gates are **operational and human**: isolation, authn/authz, credentia
 - Replay is the diagnostic source of truth; only Kubernetes-native governed evidence is implemented today.
 - Broader multi-source diagnosis remains architectural scope, not current capability.
 - Small corpus limits statistical calibration claims; ECE is above target and not tuned away.
-- Real-incident corpus acquisition is in progress; the corpus is not yet complete, and V2 blind real-incident evaluation has not begun. Real-world diagnostic reliability has not yet been established.
+- Real-incident corpus acquisition is in progress; the corpus is not yet complete. The V2 analysis plan is frozen; V2 diagnostic execution has not begun. Real-world diagnostic reliability has not yet been established.
 - Evaluation on golden / holdout / adversarial / metamorphic material is governed testing — **not** formal verification and **not** real-incident validation.
 - Digests provide deterministic integrity — **not** cryptographic authenticity.
 - Envelope-local IDs such as `ev-001` in the A2 sample are **not** the current stable fact-identity model used by A4B.

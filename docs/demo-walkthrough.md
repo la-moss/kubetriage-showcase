@@ -123,7 +123,7 @@ This is the strongest single-session demo. It shows diagnosis, drift, safety, an
 5. Confidence does not inflate. Post-drift confidence (0.76) is lower than pre-drift (0.88) because merged evidence contains contradictions.
 6. No remediation is executed. A human decides what to do next.
 
-No autonomous agent is currently connected to or admitted by KubeTriage. A4A/A4B/A5A/A5B have passed independent review and A5 is complete as an evaluation programme. A6A (admission constitution) and A6B-S2 (lifecycle ledger and idempotency) are published reviewed A6 lifecycle baselines (`v2.2.0-a6b-s2-reviewed-baseline`). A6B-S3+ and A6C–A6G remain blocked. Real-agent admission remains blocked by operational isolation review and human-approval gates. **Current diagnostic baseline:** `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`. Support-blind real-incident corpus acquisition is underway; V2 blind real-incident evaluation has not begun.
+No autonomous agent is currently connected to or admitted by KubeTriage. A4A/A4B/A5A/A5B have passed independent review and A5 is complete as an evaluation programme. A6A (admission constitution) and A6B-S2 (lifecycle ledger and idempotency) are published reviewed A6 lifecycle baselines (`v2.2.0-a6b-s2-reviewed-baseline`). A6B-S3+ and A6C–A6G remain blocked. Real-agent admission remains blocked by operational isolation review and human-approval gates. **Current diagnostic baseline:** `v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`. Support-blind real-incident corpus acquisition is underway. The V2 analysis plan is frozen; V2 diagnostic execution has not begun.
 
 ---
 
