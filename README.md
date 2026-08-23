@@ -14,13 +14,7 @@ KubeTriage currently diagnoses seven bounded Kubernetes incident classes and is
 being evaluated through controlled replay, adversarial and metamorphic testing,
 and a prospective blind real-incident validation programme.
 
-The implementation lives in the private repo
-
-## Current status
-
-Frozen diagnostic baseline:
-[`v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline`](https://github.com/la-moss/KubeTriage/tree/v2.8.0-a6b-pre-s4-result-inventory-reviewed-baseline)
-(`d3a1b85e5232a36192ed55aad9f84db090e88cc4`)
+The implementation lives in the private repo.
 
 | Area | Status |
 | --- | --- |
@@ -248,8 +242,7 @@ Representative public outputs require no cluster:
 
 The actual implementation, tests and specifications are in the private repo. If you wish to review my work, please contact me on my [LinkedIn](https://www.linkedin.com/in/lam-ai/)
 
-Start with the
-[technical review guide](https://github.com/la-moss/KubeTriage/blob/main/docs/technical-review-guide.md).
+Start with the technical review guide.
 It maps the review surface across the state machine, classifier, confidence,
 provenance, safety, replay harness, adversarial and metamorphic tests, and the
 constitution.
